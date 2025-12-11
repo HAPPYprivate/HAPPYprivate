@@ -320,6 +320,20 @@
       }
 
       // clamp alpha to 0..1
+            // fade out khi gần ra khỏi màn
+      if (this.trail.length > 2) {
+          const first = this.trail[0];
+          const last = this.trail[this.trail.length - 1];
+          const dx = last.x - first.x;
+          const dy = last.y - first.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist > this.fadeOutDist) {
+              const f = (dist - this.fadeOutDist) / this.fadeOutDist;
+              this.alpha = Math.max(0, 0.92 - f * 1.4); // mờ dần
+          }
+      }
+
       this.alpha = Math.max(0, Math.min(1, this.alpha));
     }
 
@@ -347,9 +361,9 @@
       ctx.lineWidth = (this.size * 8) * this.alpha;
       // wide soft glow
       const gradGlow = ctx.createLinearGradient(pts[0].x, pts[0].y, last.x, last.y);
-      gradGlow.addColorStop(0, `rgba(140,90,255,${0.02*this.alpha})`);
-      gradGlow.addColorStop(0.6, `rgba(180,120,255,${0.08*this.alpha})`);
-      gradGlow.addColorStop(1, `rgba(255,255,255,${0.2*this.alpha})`);
+      gradGlow.addColorStop(0, `rgba(180,120,255,${0.04*this.alpha})`);
+      gradGlow.addColorStop(0.6, `rgba(200,130,255,${0.10*this.alpha})`);
+      gradGlow.addColorStop(1, `rgba(255,255,255,${0.18*this.alpha})`);
       ctx.strokeStyle = gradGlow;
       ctx.stroke();
 
@@ -363,9 +377,9 @@
       }
       ctx.lineWidth = (this.size * 4) * this.alpha;
       const gradMid = ctx.createLinearGradient(pts[0].x, pts[0].y, last.x, last.y);
-      gradMid.addColorStop(0, `rgba(200,180,255,${0.06*this.alpha})`);
-      gradMid.addColorStop(0.7, `rgba(255,240,255,${0.6*this.alpha})`);
-      gradMid.addColorStop(1, `rgba(255,255,255,${0.9*this.alpha})`);
+      gradMid.addColorStop(0, `rgba(220,180,255,${0.10*this.alpha})`);
+      gradMid.addColorStop(0.7, `rgba(255,240,255,${0.7*this.alpha})`);
+      gradMid.addColorStop(1, `rgba(255,255,255,${1.0*this.alpha})`);
       ctx.strokeStyle = gradMid;
       ctx.stroke();
 
@@ -377,17 +391,17 @@
         const yc = (pts[i].y + pts[i+1].y)/2;
         ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
       }
-      ctx.lineWidth = (this.size * 1.2) * this.alpha;
-      ctx.strokeStyle = `rgba(255,255,255,${0.95*this.alpha})`;
+      ctx.lineWidth = (this.size * 1.0) * this.alpha;
+      ctx.strokeStyle = `rgba(255,255,255,${0.98*this.alpha})`;
       ctx.stroke();
 
       // draw head
       const h = last;
       const rad = this.size * 2.0;
       const rg = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, rad*2.5);
-      rg.addColorStop(0, `rgba(255,255,255,${1.0*this.alpha})`);
-      rg.addColorStop(0.12, `rgba(255,235,255,${0.85*this.alpha})`);
-      rg.addColorStop(0.28, `rgba(200,150,255,${0.6*this.alpha})`);
+      rg.addColorStop(0, `rgba(255,255,255,${1*this.alpha})`);
+      rg.addColorStop(0.15, `rgba(240,220,255,${0.85*this.alpha})`);
+      rg.addColorStop(0.35, `rgba(200,150,255,${0.62*this.alpha})`);
       rg.addColorStop(1, `rgba(120,30,255,0)`);
       ctx.fillStyle = rg;
       ctx.beginPath();
