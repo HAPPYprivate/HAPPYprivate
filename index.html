@@ -11,7 +11,6 @@
     --bg1: #020007;
     --bg2: #09001a;
     --accent1: #8b3bff;
-    --accent2: #5b00d9;
     --muted: #cfc6ff;
   }
 
@@ -32,6 +31,17 @@
     text-align:center;
   }
 
+  /* canvas overlays */
+  canvas.bg-canvas, canvas.meteor-canvas {
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    display:block;
+    pointer-events:none;
+    z-index:2;
+  }
+
   /* logo */
   .logo {
     position: fixed;
@@ -46,6 +56,7 @@
     background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
     box-shadow: 0 6px 30px rgba(90,10,150,0.12), inset 0 1px 0 rgba(255,255,255,0.02);
     border:1px solid rgba(150,60,255,0.06);
+    z-index:6;
   }
   .logo img{width:44px;height:44px;object-fit:contain;border-radius:8px;}
 
@@ -84,53 +95,39 @@
     line-height:1.45;
   }
 
-  /* stars layer (static twinkle) */
-  .stars, .meteors {
+  /* static small star layer (pure DOM for twinkle) */
+  .stars {
     position:absolute;
     inset:0;
+    z-index:3;
     pointer-events:none;
   }
-
   .star {
     position:absolute;
     width:2px;
     height:2px;
     background:rgba(255,255,255,0.9);
     border-radius:50%;
-    transform:translate3d(0,0,0);
     box-shadow:0 0 6px rgba(160,140,255,0.12);
-    opacity:0.9;
+    opacity:0.85;
+    transform:translate3d(0,0,0);
     animation: twinkle 6s infinite ease-in-out;
   }
-
   @keyframes twinkle {
     0%{ opacity:0.3; transform:scale(1) }
     50%{ opacity:1; transform:scale(1.4) }
     100%{ opacity:0.3; transform:scale(1) }
   }
 
-  /* shooting star style */
-  .meteors .meteor {
-    position:absolute;
-    width:2px;
-    height:2px;
-    background:linear-gradient(90deg, rgba(255,255,255,1), rgba(180,120,255,0.8));
-    box-shadow:0 0 16px rgba(180,120,255,0.8), 0 0 40px rgba(120,0,255,0.12);
-    border-radius:1px;
-    transform-origin: left center;
-    filter:drop-shadow(0 0 8px rgba(180,120,255,0.8));
-  }
-
-  /* subtle footer small text (optional) */
   .footer {
     position:fixed;
     right:12px;
     bottom:12px;
     color:rgba(230,220,255,0.28);
     font-size:12px;
+    z-index:6;
   }
 
-  /* responsive */
   @media (max-width:520px){
     h1{font-size:28px}
     .card{padding:20px}
@@ -139,16 +136,20 @@
 </head>
 <body>
   <div class="stage">
+    <!-- canvas for subtle background glow / gradient (optional) -->
+    <canvas class="bg-canvas" id="bgCanvas"></canvas>
+    <!-- static stars DOM -->
     <div class="stars" id="stars"></div>
-    <div class="meteors" id="meteors"></div>
+    <!-- canvas for meteor + trail (use additive composite) -->
+    <canvas class="meteor-canvas" id="meteorCanvas"></canvas>
 
     <div class="logo" aria-hidden="true">
       <img src="icon.png" alt="logo" />
     </div>
 
     <div class="card" role="main" aria-labelledby="page-title">
-      <h1 id="page-title">🔒 Access blocked</h1>
-      <div class="note">This script is protected by HAPPYscript; please do not attempt to view its contents.</div>
+      <h1 id="page-title">🔒 Truy cập bị chặn</h1>
+      <div class="note">Trang này chỉ hiển thị giao diện. Vui lòng sử dụng hệ thống chính thức để truy cập dữ liệu.</div>
     </div>
 
     <div class="footer">HAPPY·script</div>
@@ -156,13 +157,12 @@
 
 <script>
 /* ============================
-   Stars generation (static + twinkle)
+   Static twinkling stars (DOM)
    ============================ */
 (function makeStars(){
   const container = document.getElementById('stars');
-  const count = 180;
+  const count = 160;
   const rnd = (min,max)=>Math.random()*(max-min)+min;
-
   for(let i=0;i<count;i++){
     const s=document.createElement('div');
     s.className='star';
@@ -172,91 +172,218 @@
     s.style.top  = y + 'vh';
     s.style.width = size + 'px';
     s.style.height = size + 'px';
-    s.style.opacity = rnd(0.2,1).toFixed(2);
-    // vary animation duration & delay
+    s.style.opacity = rnd(0.15,0.95);
     s.style.animationDuration = (rnd(4,9)).toFixed(2) + 's';
     s.style.animationDelay = (rnd(0,6)).toFixed(2) + 's';
     container.appendChild(s);
   }
 })();
 
-
 /* ============================
-   Shooting stars (random occasionally)
+   Meteor system using canvas
+   - bright head + trailing particles (glow + fade)
+   - full-screen movement, crosses entire viewport
    ============================ */
-(function meteors(){
-  const container = document.getElementById('meteors');
-  const rnd = (min,max)=>Math.random()*(max-min)+min;
 
-  function createMeteor(){
-    const m = document.createElement('div');
-    m.className = 'meteor';
+(function MeteorEngine(){
+  const canvas = document.getElementById('meteorCanvas');
+  const ctx = canvas.getContext('2d');
+  let width = 0, height = 0, DPR = Math.max(1, window.devicePixelRatio || 1);
 
-    // random start near top-right quadrant or left quadrant
-    const startFromRight = Math.random() > 0.5;
-    const startX = startFromRight ? rnd(60, 100) : rnd(0, 40);
-    const startY = rnd(5, 40);
+  function resize(){
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = Math.floor(width * DPR);
+    canvas.height = Math.floor(height * DPR);
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize);
+  resize();
 
-    // direction: left-down or right-down
-    const angle = startFromRight ? rnd(200, 260) : rnd(280, 340);
-    const len = rnd(180, 420); // px trail length
-    const speed = rnd(900, 2300); // ms
+  // Respect prefers-reduced-motion
+  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-    // initial placement
-    m.style.left = startX + 'vw';
-    m.style.top  = startY + 'vh';
+  // Meteor class
+  class Meteor {
+    constructor(){
+      // spawn just outside viewport (random edge) so it crosses fully
+      const side = Math.random() < 0.5 ? 'left' : 'right'; // start left or right
+      const fromTop = Math.random() * 0.35 * height; // top zone
+      if(side === 'right'){
+        this.x = width + Math.random()*100;
+        this.y = fromTop;
+        this.angle = (200 + Math.random()*80) * Math.PI/180; // move left-down
+      } else {
+        this.x = -Math.random()*100;
+        this.y = fromTop;
+        this.angle = (280 + Math.random()*80) * Math.PI/180; // move right-down
+      }
 
-    // size and rotation
-    m.style.width = (rnd(2,5)) + 'px';
-    m.style.height = (rnd(2,3)) + 'px';
-    m.style.transform = 'rotate(' + angle + 'deg) translateX(0px)';
+      // speed and length
+      this.speed = (Math.random()*900 + 600) / 1000; // pixels per ms (0.6 - 1.5 px/ms)
+      this.length = Math.random()*220 + 220; // trail length in px
+      this.size = Math.random()*1.8 + 1.8; // head radius
+      this.life = 0;
+      this.maxLife = (Math.abs(Math.cos(this.angle))*this.length + Math.abs(Math.sin(this.angle))*this.length) / this.speed + 300;
+      this.trail = []; // holds previous positions for smooth trail
+      this.glowHue = 270 + Math.random()*40; // purple-pink hue
+      this.alpha = 1.0;
+    }
+    update(dt){
+      // dt in ms
+      const dx = Math.cos(this.angle)*this.speed*dt;
+      const dy = Math.sin(this.angle)*this.speed*dt;
+      this.x += dx;
+      this.y += dy;
+      this.life += dt;
 
-    container.appendChild(m);
+      // push into trail (keep limited length)
+      this.trail.push({x: this.x, y: this.y});
+      if(this.trail.length > Math.ceil(this.length/6)) this.trail.shift();
 
-    // animate manually using CSS transforms & transition
-    // compute relative movement in vw/vh -> convert to px by viewport
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      // fade alpha toward end
+      const remain = Math.max(0, this.maxLife - this.life);
+      this.alpha = Math.max(0, Math.min(1, remain / 500));
+    }
+    draw(ctx){
+      // additive blend for bright effect
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
 
-    // compute dx,dy from angle and length
-    const rad = angle * Math.PI / 180;
-    const dx = Math.cos(rad) * len;
-    const dy = Math.sin(rad) * len;
+      // draw trail as series of lines with decreasing alpha and width
+      for(let i=0;i<this.trail.length-1;i++){
+        const p1 = this.trail[i];
+        const p2 = this.trail[i+1];
+        const t = i / (this.trail.length-1);
+        const lineWidth = (1 + (1 - t) * 6) * this.size;
+        const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+        const hue = this.glowHue;
+        grad.addColorStop(0, `rgba(255,255,255,${0.9 * (1 - t) * this.alpha})`);
+        grad.addColorStop(0.3, `rgba(${200},${160},${255},${0.5 * (1 - t) * this.alpha})`);
+        grad.addColorStop(1, `rgba(${120},${40},${255},${0.02 * (1 - t) * this.alpha})`);
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = lineWidth;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+      }
 
-    m.style.transition = `transform ${speed}ms linear, opacity ${speed * 0.9}ms linear`;
-    // start after tiny delay to ensure append
-    requestAnimationFrame(()=> {
-      m.style.transform = `rotate(${angle}deg) translate(${dx}px, ${dy}px)`;
-      m.style.opacity = '0';
-    });
+      // bright head (core)
+      const head = this.trail[this.trail.length-1];
+      if(head){
+        const rad = this.size * 2.2;
+        const g = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, rad*2.6);
+        g.addColorStop(0, `rgba(255,255,255,${0.95*this.alpha})`);
+        g.addColorStop(0.15, `rgba(255,240,255,${0.7*this.alpha})`);
+        g.addColorStop(0.3, `rgba(200,160,255,${0.45*this.alpha})`);
+        g.addColorStop(1, `rgba(120,40,255,0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, rad*1.8, 0, Math.PI*2);
+        ctx.fill();
 
-    // remove after complete
-    setTimeout(()=> {
-      try{ container.removeChild(m); } catch(e){}
-    }, speed + 120);
+        // small sharp core
+        ctx.fillStyle = `rgba(255,255,255,${0.98*this.alpha})`;
+        ctx.beginPath();
+        ctx.arc(head.x, head.y, this.size, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+    }
+    isDead(){
+      // out of visible area + life exceeded
+      if(this.life > this.maxLife + 200) return true;
+      if(this.x < -200 || this.x > width + 200 || this.y > height + 200) return true;
+      return false;
+    }
   }
 
-  // spawn meteors at randomized intervals (in seconds)
-  function schedule(){
-    const next = Math.random()*8000 + 3000; // 3s - 11s
-    setTimeout(()=> {
-      // occasionally spawn 1-3 meteors at once
-      const group = Math.random() > 0.6 ? Math.floor(Math.random()*3)+1 : 1;
-      for(let i=0;i<group;i++){
-        setTimeout(createMeteor, i*160);
+  const meteors = [];
+
+  // spawn logic
+  let lastSpawn = 0;
+  function spawnMeteor(){
+    // stop if reduced motion preferred
+    if(reduced) return;
+    meteors.push(new Meteor());
+  }
+
+  function scheduleSpawn(){
+    // interval 2.5-9s typical; sometimes bursts
+    const next = Math.random()*6500 + 1800;
+    setTimeout(()=>{
+      // sometimes spawn multiple
+      const burst = Math.random() > 0.7 ? Math.floor(Math.random()*3)+1 : 1;
+      for(let i=0;i<burst;i++){
+        setTimeout(spawnMeteor, i*120);
       }
-      schedule();
+      scheduleSpawn();
     }, next);
   }
+  scheduleSpawn();
 
-  schedule();
+  // main loop
+  let last = performance.now();
+  function tick(now){
+    const dt = now - last;
+    last = now;
+    // clear with slight fade for trail persistence (motion blur)
+    ctx.clearRect(0,0,width,height);
+    // update & draw meteors
+    for(let i=meteors.length-1;i>=0;i--){
+      const m = meteors[i];
+      m.update(dt);
+      m.draw(ctx);
+      if(m.isDead()){
+        meteors.splice(i,1);
+      }
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  // resize handler attached above
 })();
 
-/* Accessibility: pause animations on reduced-motion preference */
+/* Optional: subtle animated bg on canvas (not necessary) */
+(function bgCanvas(){
+  const c = document.getElementById('bgCanvas');
+  const ctx = c.getContext('2d');
+  let w=0,h=0,DPR=Math.max(1,window.devicePixelRatio||1);
+  function resize(){
+    w = innerWidth; h = innerHeight;
+    c.width = Math.floor(w*DPR);
+    c.height = Math.floor(h*DPR);
+    c.style.width = w+'px';
+    c.style.height = h+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize); resize();
+
+  let t=0;
+  function frame(){
+    t += 0.005;
+    // very subtle moving vignette / haze
+    ctx.clearRect(0,0,w,h);
+    const g = ctx.createRadialGradient(w*0.15, h*0.2, 0, w*0.5, h*0.6, Math.max(w,h));
+    g.addColorStop(0, `rgba(110,10,170,${0.06 + 0.02*Math.sin(t*2)})`);
+    g.addColorStop(1, `rgba(0,0,0,0)`);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,w,h);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* Accessibility: respect reduced-motion & reduce spawn */
 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  document.querySelectorAll('.star').forEach(s => s.style.animation = 'none');
-  // stop creating meteors
-  // (we do not have a handle here; reduced-motion users will still not be bothered)
+  // reduce heavy animations: remove meteors schedule by letting reduced flag handle it
+  console.log('prefers-reduced-motion: reduce — meteor animations decreased or disabled.');
 }
 </script>
 </body>
