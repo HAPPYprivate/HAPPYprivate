@@ -1,129 +1,262 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <title>Script Viewer</title>
-  <link rel="icon" href="https://raw.githubusercontent.com/HAPPY-private/PRIVATE/main/icon.png">
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      overflow: hidden;
-      font-family: 'Segoe UI', sans-serif;
-      color: white;
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>🔒 Access blocked</title>
 
-    body {
-      background: linear-gradient(-45deg, #8e0038, #350048, #8e0038, #350048);
-      background-size: 400% 400%;
-      animation: gradientBG 15s ease infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      text-align: center;
-    }
+<style>
+  :root{
+    --bg1: #020007;
+    --bg2: #09001a;
+    --accent1: #8b3bff;
+    --accent2: #5b00d9;
+    --muted: #cfc6ff;
+  }
 
-    @keyframes gradientBG {
-      0% {background-position: 0% 50%;}
-      50% {background-position: 100% 50%;}
-      100% {background-position: 0% 50%;}
-    }
+  html,body{height:100%;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, sans-serif;overflow:hidden;background:var(--bg1);color:var(--muted)}
 
-    h1 {
-      font-size: 3.5em;
-      margin: 0;
-    }
+  /* gradient space */
+  .stage{
+    position:relative;
+    width:100%;
+    height:100%;
+    background: radial-gradient(1200px 600px at 10% 20%, rgba(107,0,153,0.22), transparent 10%),
+                radial-gradient(1000px 500px at 90% 80%, rgba(80,0,200,0.18), transparent 10%),
+                linear-gradient(180deg, var(--bg2), var(--bg1));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-direction:column;
+    text-align:center;
+  }
 
-    p {
-      font-size: 1.5em;
-      color: #ffb3d1;
-    }
+  /* logo */
+  .logo {
+    position: fixed;
+    left: 18px;
+    top: 18px;
+    width: 56px;
+    height: 56px;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+    box-shadow: 0 6px 30px rgba(90,10,150,0.12), inset 0 1px 0 rgba(255,255,255,0.02);
+    border:1px solid rgba(150,60,255,0.06);
+  }
+  .logo img{width:44px;height:44px;object-fit:contain;border-radius:8px;}
 
-    .icon {
-      position: absolute;
-      font-size: 2em;
-      opacity: 0.1;
-      animation: fly 20s linear infinite;
-    }
+  /* content */
+  .card {
+    z-index:5;
+    max-width:920px;
+    width:92%;
+    padding:36px 40px;
+    border-radius:16px;
+    background: linear-gradient(180deg, rgba(12,6,25,0.55), rgba(8,2,18,0.35));
+    border:1px solid rgba(120,40,255,0.08);
+    box-shadow: 0 10px 60px rgba(40,10,80,0.45);
+    backdrop-filter: blur(8px) saturate(1.05);
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    align-items:center;
+  }
 
-    @keyframes fly {
-      0% {
-        transform: translate(0, 0) rotate(0deg);
-        opacity: 0;
-      }
-      10% { opacity: 0.1; }
-      50% { opacity: 0.15; }
-      100% {
-        transform: translate(-100vw, -100vh) rotate(720deg);
-        opacity: 0;
-      }
-    }
+  h1 {
+    margin:0;
+    font-size:36px;
+    letter-spacing:0.6px;
+    color:var(--accent1);
+    text-shadow:
+      0 6px 24px rgba(90,15,200,0.18),
+      0 1px 0 rgba(255,255,255,0.02);
+  }
 
-    /* Chặn bấm vào raw link */
-    .raw-link {
-      display: none;  /* Ẩn link raw */
-    }
+  .note {
+    color: #e9e3ff;
+    opacity:0.88;
+    font-size:16px;
+    max-width:780px;
+    line-height:1.45;
+  }
 
-    .info-text {
-      font-size: 1.2em;
-      margin-top: 20px;
-      color: yellow;
-    }
-  </style>
+  /* stars layer (static twinkle) */
+  .stars, .meteors {
+    position:absolute;
+    inset:0;
+    pointer-events:none;
+  }
+
+  .star {
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:rgba(255,255,255,0.9);
+    border-radius:50%;
+    transform:translate3d(0,0,0);
+    box-shadow:0 0 6px rgba(160,140,255,0.12);
+    opacity:0.9;
+    animation: twinkle 6s infinite ease-in-out;
+  }
+
+  @keyframes twinkle {
+    0%{ opacity:0.3; transform:scale(1) }
+    50%{ opacity:1; transform:scale(1.4) }
+    100%{ opacity:0.3; transform:scale(1) }
+  }
+
+  /* shooting star style */
+  .meteors .meteor {
+    position:absolute;
+    width:2px;
+    height:2px;
+    background:linear-gradient(90deg, rgba(255,255,255,1), rgba(180,120,255,0.8));
+    box-shadow:0 0 16px rgba(180,120,255,0.8), 0 0 40px rgba(120,0,255,0.12);
+    border-radius:1px;
+    transform-origin: left center;
+    filter:drop-shadow(0 0 8px rgba(180,120,255,0.8));
+  }
+
+  /* subtle footer small text (optional) */
+  .footer {
+    position:fixed;
+    right:12px;
+    bottom:12px;
+    color:rgba(230,220,255,0.28);
+    font-size:12px;
+  }
+
+  /* responsive */
+  @media (max-width:520px){
+    h1{font-size:28px}
+    .card{padding:20px}
+  }
+</style>
 </head>
 <body>
-  <h1>🚫 ACCESS DENIED 🚫</h1>
-  <p>Nice try😄! But this isn’t your playground🤫.</p>
-  
-  <!-- Vùng hiển thị link raw chỉ cho phép truy cập từ Roblox -->
-  <div class="raw-link">
-    <a id="raw-link" href="https://raw.githubusercontent.com/HiBro/GoodBro/main/uh?">Raw Script</a>
+  <div class="stage">
+    <div class="stars" id="stars"></div>
+    <div class="meteors" id="meteors"></div>
+
+    <div class="logo" aria-hidden="true">
+      <img src="icon.png" alt="logo" />
+    </div>
+
+    <div class="card" role="main" aria-labelledby="page-title">
+      <h1 id="page-title">🔒 Access blocked</h1>
+      <div class="note">This script is protected by HAPPYscript; please do not attempt to view its contents.</div>
+    </div>
+
+    <div class="footer">HAPPY·script</div>
   </div>
-  
-  <!-- Text info cho người dùng -->
-  <div class="info-text">
-    <p>
-      Wanna peek into the script🤔? Oops – not happening✋.<br>
-      You should just run the script like other players👍.
-    </p>
-  </div>
 
-  <script>
-    // Link raw script
-    const rawScriptUrl = 'https://raw.githubusercontent.com/HiBro/GoodBro/main/uh?';
+<script>
+/* ============================
+   Stars generation (static + twinkle)
+   ============================ */
+(function makeStars(){
+  const container = document.getElementById('stars');
+  const count = 180;
+  const rnd = (min,max)=>Math.random()*(max-min)+min;
 
-    // Kiểm tra môi trường truy cập
-    if (window.location.hostname === 'happy-private.github.io') {
-      // Khi trang web được truy cập từ trình duyệt thông thường, ẩn link raw và thông báo
-      document.getElementById('raw-link').style.display = 'none';
-      document.body.innerHTML += "<p>This page is restricted. Please use Roblox to access the script.</p>";
-    }
+  for(let i=0;i<count;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const x=rnd(0,100), y=rnd(0,100);
+    const size=rnd(0.6,2.2);
+    s.style.left = x + 'vw';
+    s.style.top  = y + 'vh';
+    s.style.width = size + 'px';
+    s.style.height = size + 'px';
+    s.style.opacity = rnd(0.2,1).toFixed(2);
+    // vary animation duration & delay
+    s.style.animationDuration = (rnd(4,9)).toFixed(2) + 's';
+    s.style.animationDelay = (rnd(0,6)).toFixed(2) + 's';
+    container.appendChild(s);
+  }
+})();
 
-    // Tạo loadstring cho Roblox
-    function loadScriptForRoblox() {
-      const script = `loadstring(game:HttpGet("${rawScriptUrl}"))()`;
-      eval(script);  // Thực thi script khi Roblox gọi vào
-    }
-  </script>
 
-  <!-- Tự động gọi script cho Roblox khi cần thiết -->
-  <script>
-    loadScriptForRoblox();
-  </script>
+/* ============================
+   Shooting stars (random occasionally)
+   ============================ */
+(function meteors(){
+  const container = document.getElementById('meteors');
+  const rnd = (min,max)=>Math.random()*(max-min)+min;
 
-  <script>
-    for (let i = 0; i < 25; i++) {
-      const icon = document.createElement('div');
-      icon.className = 'icon';
-      icon.innerText = '🚫';
-      icon.style.left = Math.random() * 100 + 'vw';
-      icon.style.bottom = '-' + Math.random() * 100 + 'px';
-      icon.style.fontSize = (Math.random() * 1.5 + 1.5) + 'em';
-      icon.style.animationDuration = (15 + Math.random() * 10) + 's';
-      document.body.appendChild(icon);
-    }
-  </script>
+  function createMeteor(){
+    const m = document.createElement('div');
+    m.className = 'meteor';
+
+    // random start near top-right quadrant or left quadrant
+    const startFromRight = Math.random() > 0.5;
+    const startX = startFromRight ? rnd(60, 100) : rnd(0, 40);
+    const startY = rnd(5, 40);
+
+    // direction: left-down or right-down
+    const angle = startFromRight ? rnd(200, 260) : rnd(280, 340);
+    const len = rnd(180, 420); // px trail length
+    const speed = rnd(900, 2300); // ms
+
+    // initial placement
+    m.style.left = startX + 'vw';
+    m.style.top  = startY + 'vh';
+
+    // size and rotation
+    m.style.width = (rnd(2,5)) + 'px';
+    m.style.height = (rnd(2,3)) + 'px';
+    m.style.transform = 'rotate(' + angle + 'deg) translateX(0px)';
+
+    container.appendChild(m);
+
+    // animate manually using CSS transforms & transition
+    // compute relative movement in vw/vh -> convert to px by viewport
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+
+    // compute dx,dy from angle and length
+    const rad = angle * Math.PI / 180;
+    const dx = Math.cos(rad) * len;
+    const dy = Math.sin(rad) * len;
+
+    m.style.transition = `transform ${speed}ms linear, opacity ${speed * 0.9}ms linear`;
+    // start after tiny delay to ensure append
+    requestAnimationFrame(()=> {
+      m.style.transform = `rotate(${angle}deg) translate(${dx}px, ${dy}px)`;
+      m.style.opacity = '0';
+    });
+
+    // remove after complete
+    setTimeout(()=> {
+      try{ container.removeChild(m); } catch(e){}
+    }, speed + 120);
+  }
+
+  // spawn meteors at randomized intervals (in seconds)
+  function schedule(){
+    const next = Math.random()*8000 + 3000; // 3s - 11s
+    setTimeout(()=> {
+      // occasionally spawn 1-3 meteors at once
+      const group = Math.random() > 0.6 ? Math.floor(Math.random()*3)+1 : 1;
+      for(let i=0;i<group;i++){
+        setTimeout(createMeteor, i*160);
+      }
+      schedule();
+    }, next);
+  }
+
+  schedule();
+})();
+
+/* Accessibility: pause animations on reduced-motion preference */
+if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.querySelectorAll('.star').forEach(s => s.style.animation = 'none');
+  // stop creating meteors
+  // (we do not have a handle here; reduced-motion users will still not be bothered)
+}
+</script>
 </body>
 </html>
