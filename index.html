@@ -9,26 +9,23 @@
 <style>
   :root{
     --bg1: #020007;
-    --bg2: #09001a;
-    --accent1: #8b3bff;
-    --muted: #cfc6ff;
+    --bg2: #060014;
+    --accent1: #9b56ff;
+    --muted: #dcd4ff;
   }
 
   html,body{height:100%;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, sans-serif;overflow:hidden;background:var(--bg1);color:var(--muted)}
 
-  /* gradient space */
   .stage{
     position:relative;
     width:100%;
     height:100%;
-    background: radial-gradient(1200px 600px at 10% 20%, rgba(107,0,153,0.22), transparent 10%),
-                radial-gradient(1000px 500px at 90% 80%, rgba(80,0,200,0.18), transparent 10%),
-                linear-gradient(180deg, var(--bg2), var(--bg1));
     display:flex;
     align-items:center;
     justify-content:center;
     flex-direction:column;
     text-align:center;
+    background: linear-gradient(180deg, var(--bg2), var(--bg1));
   }
 
   /* canvas overlays */
@@ -68,7 +65,7 @@
     padding:36px 40px;
     border-radius:16px;
     background: linear-gradient(180deg, rgba(12,6,25,0.55), rgba(8,2,18,0.35));
-    border:1px solid rgba(120,40,255,0.08);
+    border:1px solid rgba(120,40,255,0.06);
     box-shadow: 0 10px 60px rgba(40,10,80,0.45);
     backdrop-filter: blur(8px) saturate(1.05);
     display:flex;
@@ -82,20 +79,18 @@
     font-size:36px;
     letter-spacing:0.6px;
     color:var(--accent1);
-    text-shadow:
-      0 6px 24px rgba(90,15,200,0.18),
-      0 1px 0 rgba(255,255,255,0.02);
+    text-shadow: 0 6px 24px rgba(120,40,255,0.14), 0 1px 0 rgba(255,255,255,0.02);
   }
 
   .note {
     color: #e9e3ff;
-    opacity:0.88;
+    opacity:0.9;
     font-size:16px;
     max-width:780px;
     line-height:1.45;
   }
 
-  /* static small star layer (pure DOM for twinkle) */
+  /* static small star layer (DOM twinkle) */
   .stars {
     position:absolute;
     inset:0;
@@ -114,9 +109,9 @@
     animation: twinkle 6s infinite ease-in-out;
   }
   @keyframes twinkle {
-    0%{ opacity:0.3; transform:scale(1) }
-    50%{ opacity:1; transform:scale(1.4) }
-    100%{ opacity:0.3; transform:scale(1) }
+    0%{ opacity:0.25; transform:scale(1) }
+    50%{ opacity:1; transform:scale(1.5) }
+    100%{ opacity:0.25; transform:scale(1) }
   }
 
   .footer {
@@ -136,11 +131,8 @@
 </head>
 <body>
   <div class="stage">
-    <!-- canvas for subtle background glow / gradient (optional) -->
     <canvas class="bg-canvas" id="bgCanvas"></canvas>
-    <!-- static stars DOM -->
     <div class="stars" id="stars"></div>
-    <!-- canvas for meteor + trail (use additive composite) -->
     <canvas class="meteor-canvas" id="meteorCanvas"></canvas>
 
     <div class="logo" aria-hidden="true">
@@ -157,7 +149,7 @@
 
 <script>
 /* ============================
-   Static twinkling stars (DOM)
+   Small twinkling stars (DOM)
    ============================ */
 (function makeStars(){
   const container = document.getElementById('stars');
@@ -172,7 +164,7 @@
     s.style.top  = y + 'vh';
     s.style.width = size + 'px';
     s.style.height = size + 'px';
-    s.style.opacity = rnd(0.15,0.95);
+    s.style.opacity = rnd(0.12,0.95);
     s.style.animationDuration = (rnd(4,9)).toFixed(2) + 's';
     s.style.animationDelay = (rnd(0,6)).toFixed(2) + 's';
     container.appendChild(s);
@@ -180,9 +172,72 @@
 })();
 
 /* ============================
-   Meteor system using canvas
-   - bright head + trailing particles (glow + fade)
-   - full-screen movement, crosses entire viewport
+   Background Nebula (2 soft purple blobs, animated)
+   - Replaces static blobs; move slowly and fade in/out
+   ============================ */
+(function NebulaBG(){
+  const c = document.getElementById('bgCanvas');
+  const ctx = c.getContext('2d');
+  let w=0,h=0,DPR=Math.max(1,window.devicePixelRatio||1);
+  function resize(){
+    w = innerWidth; h = innerHeight;
+    c.width = Math.floor(w*DPR);
+    c.height = Math.floor(h*DPR);
+    c.style.width = w+'px';
+    c.style.height = h+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  window.addEventListener('resize', resize); resize();
+
+  const ENABLE_NEBULA = true;
+  // Two nebula blobs with independent slow motion
+  const blobs = [
+    { xPct: 0.12, yPct: 0.22, radius: Math.max(600, Math.min(900, Math.max(w,h)/1.2)), phase: Math.random()*Math.PI*2, speed: 0.00012, baseAlpha: 0.18 },
+    { xPct: 0.86, yPct: 0.78, radius: Math.max(500, Math.min(900, Math.max(w,h)/1.6)), phase: Math.random()*Math.PI*2, speed: 0.00008, baseAlpha: 0.14 }
+  ];
+
+  function drawNebula(t){
+    if(!ENABLE_NEBULA) return;
+    ctx.clearRect(0,0,w,h);
+    // subtle vignette
+    const vign = ctx.createRadialGradient(w*0.5, h*0.5, 0, w*0.5, h*0.5, Math.max(w,h));
+    vign.addColorStop(0, 'rgba(10,4,20,0.10)');
+    vign.addColorStop(1, 'rgba(0,0,0,0.35)');
+    ctx.fillStyle = vign;
+    ctx.fillRect(0,0,w,h);
+
+    blobs.forEach((b,idx)=>{
+      const time = t * 0.0006;
+      // slow noise-like motion using sines
+      const dx = Math.cos(b.phase + time * (0.3 + idx*0.15)) * (w*0.04);
+      const dy = Math.sin(b.phase*1.3 + time * (0.18 + idx*0.07)) * (h*0.03);
+      const cx = Math.floor(w * b.xPct + dx);
+      const cy = Math.floor(h * b.yPct + dy);
+      const r = b.radius * (0.9 + 0.12 * Math.sin(b.phase*0.7 + time*0.6));
+      const alpha = b.baseAlpha * (0.6 + 0.4 * Math.sin(b.phase*0.9 + time*0.9));
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+      g.addColorStop(0, `rgba(150,70,255,${(alpha*0.95).toFixed(3)})`);
+      g.addColorStop(0.25, `rgba(110,30,220,${(alpha*0.6).toFixed(3)})`);
+      g.addColorStop(0.6, `rgba(60,0,120,${(alpha*0.22).toFixed(3)})`);
+      g.addColorStop(1, `rgba(0,0,0,0)`);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.fillStyle = g;
+      ctx.fillRect(cx - r*1.05, cy - r*1.05, r*2.1, r*2.1);
+      ctx.globalCompositeOperation = 'source-over';
+    });
+  }
+
+  let start = performance.now();
+  function frame(now){
+    drawNebula(now - start);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+/* ============================
+   Meteor system using canvas (improved smooth trail)
+   - smoother quadratic trail, guaranteed crossing, rare early fade
    ============================ */
 
 (function MeteorEngine(){
@@ -202,188 +257,199 @@
   window.addEventListener('resize', resize);
   resize();
 
-  // Respect prefers-reduced-motion
   const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  // Meteor class
   class Meteor {
     constructor(){
-      // spawn just outside viewport (random edge) so it crosses fully
-      const side = Math.random() < 0.5 ? 'left' : 'right'; // start left or right
-      const fromTop = Math.random() * 0.35 * height; // top zone
-      if(side === 'right'){
-        this.x = width + Math.random()*100;
-        this.y = fromTop;
-        this.angle = (200 + Math.random()*80) * Math.PI/180; // move left-down
+      const startFromRight = Math.random() > 0.5;
+      const band = Math.random() * 0.35; // top band fraction
+      this.y = Math.random() * height * band + height * 0.02;
+      if(startFromRight){
+        this.x = width + Math.random()*160;
+        // angle to go left-down across screen
+        this.angle = (200 + Math.random()*80) * Math.PI/180;
       } else {
-        this.x = -Math.random()*100;
-        this.y = fromTop;
-        this.angle = (280 + Math.random()*80) * Math.PI/180; // move right-down
+        this.x = -Math.random()*160;
+        this.angle = (280 + Math.random()*80) * Math.PI/180;
       }
 
-      // speed and length
-      this.speed = (Math.random()*900 + 600) / 1000; // pixels per ms (0.6 - 1.5 px/ms)
-      this.length = Math.random()*220 + 220; // trail length in px
-      this.size = Math.random()*1.8 + 1.8; // head radius
+      // speed (px/ms) tuned for smooth crossing
+      this.speed = (Math.random()*1100 + 700) / 1000; // 0.7 - 1.8 px/ms
+      this.size = Math.random()*1.6 + 1.8;
+      this.trail = []; // smoothed points
+      // target trail length in px
+      this.trailLen = Math.random()*300 + 300; // 300 - 600px
       this.life = 0;
-      this.maxLife = (Math.abs(Math.cos(this.angle))*this.length + Math.abs(Math.sin(this.angle))*this.length) / this.speed + 300;
-      this.trail = []; // holds previous positions for smooth trail
-      this.glowHue = 270 + Math.random()*40; // purple-pink hue
-      this.alpha = 1.0;
+      this.alpha = 1;
+      this.hue = 255; // purple glow base
+      // will the meteor fade early? rare
+      this.earlyFade = Math.random() < 0.05; // 5% chance
+      this.fadeStartAfter = this.earlyFade ? (Math.random()*0.4 + 0.25) : 1.1; // fraction of crossing
+      // record starting position
+      this.started = false;
     }
+
     update(dt){
-      // dt in ms
-      const dx = Math.cos(this.angle)*this.speed*dt;
-      const dy = Math.sin(this.angle)*this.speed*dt;
-      this.x += dx;
-      this.y += dy;
+      // move
+      const dx = Math.cos(this.angle) * this.speed * dt;
+      const dy = Math.sin(this.angle) * this.speed * dt;
+      this.x += dx; this.y += dy;
       this.life += dt;
 
-      // push into trail (keep limited length)
-      this.trail.push({x: this.x, y: this.y});
-      if(this.trail.length > Math.ceil(this.length/6)) this.trail.shift();
+      // push current head into trail
+      this.trail.push({x:this.x, y:this.y, t: performance.now()});
+      // trim trail by pixel length: remove oldest until approximate length <= trailLen
+      // approximate by keeping last N points and trimming if too long
+      while(this.trail.length > 4){
+        const first = this.trail[0];
+        const last = this.trail[this.trail.length-1];
+        const dxl = last.x - first.x;
+        const dyl = last.y - first.y;
+        const approxLen = Math.hypot(dxl, dyl);
+        if(approxLen > this.trailLen) break;
+        // if approxLen <= trailLen but too many points, keep sampling
+        if(this.trail.length > 200) this.trail.shift();
+        else break;
+      }
 
-      // fade alpha toward end
-      const remain = Math.max(0, this.maxLife - this.life);
-      this.alpha = Math.max(0, Math.min(1, remain / 500));
+      // early fade logic (rare)
+      if(this.earlyFade){
+        // find fraction of screen crossed approximate
+        const frac = Math.abs(this.x - width/2) / (width/2 + 200);
+        if(frac > this.fadeStartAfter) this.alpha = Math.max(0, 1 - (frac - this.fadeStartAfter) * 1.8);
+      }
+
+      // clamp alpha to 0..1
+      this.alpha = Math.max(0, Math.min(1, this.alpha));
     }
+
+    // draw smooth trail using quadratic curve interpolation
     draw(ctx){
-      // additive blend for bright effect
+      if(this.trail.length < 2) return;
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
 
-      // draw trail as series of lines with decreasing alpha and width
-      for(let i=0;i<this.trail.length-1;i++){
-        const p1 = this.trail[i];
-        const p2 = this.trail[i+1];
-        const t = i / (this.trail.length-1);
-        const lineWidth = (1 + (1 - t) * 6) * this.size;
-        const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
-        const hue = this.glowHue;
-        grad.addColorStop(0, `rgba(255,255,255,${0.9 * (1 - t) * this.alpha})`);
-        grad.addColorStop(0.3, `rgba(${200},${160},${255},${0.5 * (1 - t) * this.alpha})`);
-        grad.addColorStop(1, `rgba(${120},${40},${255},${0.02 * (1 - t) * this.alpha})`);
-        ctx.strokeStyle = grad;
-        ctx.lineWidth = lineWidth;
-        ctx.lineCap = 'round';
-        ctx.beginPath();
-        ctx.moveTo(p1.x, p1.y);
-        ctx.lineTo(p2.x, p2.y);
-        ctx.stroke();
-      }
+      // draw glow layers (wider, soft)
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
 
-      // bright head (core)
-      const head = this.trail[this.trail.length-1];
-      if(head){
-        const rad = this.size * 2.2;
-        const g = ctx.createRadialGradient(head.x, head.y, 0, head.x, head.y, rad*2.6);
-        g.addColorStop(0, `rgba(255,255,255,${0.95*this.alpha})`);
-        g.addColorStop(0.15, `rgba(255,240,255,${0.7*this.alpha})`);
-        g.addColorStop(0.3, `rgba(200,160,255,${0.45*this.alpha})`);
-        g.addColorStop(1, `rgba(120,40,255,0)`);
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(head.x, head.y, rad*1.8, 0, Math.PI*2);
-        ctx.fill();
-
-        // small sharp core
-        ctx.fillStyle = `rgba(255,255,255,${0.98*this.alpha})`;
-        ctx.beginPath();
-        ctx.arc(head.x, head.y, this.size, 0, Math.PI*2);
-        ctx.fill();
+      // create path smoothed via quadratic curve
+      ctx.beginPath();
+      const pts = this.trail;
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length-1;i++){
+        const xc = (pts[i].x + pts[i+1].x)/2;
+        const yc = (pts[i].y + pts[i+1].y)/2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
       }
+      // final segment
+      const last = pts[pts.length-1];
+      ctx.lineWidth = (this.size * 8) * this.alpha;
+      // wide soft glow
+      const gradGlow = ctx.createLinearGradient(pts[0].x, pts[0].y, last.x, last.y);
+      gradGlow.addColorStop(0, `rgba(140,90,255,${0.02*this.alpha})`);
+      gradGlow.addColorStop(0.6, `rgba(180,120,255,${0.08*this.alpha})`);
+      gradGlow.addColorStop(1, `rgba(255,255,255,${0.2*this.alpha})`);
+      ctx.strokeStyle = gradGlow;
+      ctx.stroke();
+
+      // mid glow
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length-1;i++){
+        const xc = (pts[i].x + pts[i+1].x)/2;
+        const yc = (pts[i].y + pts[i+1].y)/2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      }
+      ctx.lineWidth = (this.size * 4) * this.alpha;
+      const gradMid = ctx.createLinearGradient(pts[0].x, pts[0].y, last.x, last.y);
+      gradMid.addColorStop(0, `rgba(200,180,255,${0.06*this.alpha})`);
+      gradMid.addColorStop(0.7, `rgba(255,240,255,${0.6*this.alpha})`);
+      gradMid.addColorStop(1, `rgba(255,255,255,${0.9*this.alpha})`);
+      ctx.strokeStyle = gradMid;
+      ctx.stroke();
+
+      // sharp core line (thin bright)
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for(let i=1;i<pts.length-1;i++){
+        const xc = (pts[i].x + pts[i+1].x)/2;
+        const yc = (pts[i].y + pts[i+1].y)/2;
+        ctx.quadraticCurveTo(pts[i].x, pts[i].y, xc, yc);
+      }
+      ctx.lineWidth = (this.size * 1.2) * this.alpha;
+      ctx.strokeStyle = `rgba(255,255,255,${0.95*this.alpha})`;
+      ctx.stroke();
+
+      // draw head
+      const h = last;
+      const rad = this.size * 2.0;
+      const rg = ctx.createRadialGradient(h.x, h.y, 0, h.x, h.y, rad*2.5);
+      rg.addColorStop(0, `rgba(255,255,255,${1.0*this.alpha})`);
+      rg.addColorStop(0.12, `rgba(255,235,255,${0.85*this.alpha})`);
+      rg.addColorStop(0.28, `rgba(200,150,255,${0.6*this.alpha})`);
+      rg.addColorStop(1, `rgba(120,30,255,0)`);
+      ctx.fillStyle = rg;
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, rad*1.6, 0, Math.PI*2);
+      ctx.fill();
+
+      // sharp core dot
+      ctx.fillStyle = `rgba(255,255,255,${0.98*this.alpha})`;
+      ctx.beginPath();
+      ctx.arc(h.x, h.y, this.size, 0, Math.PI*2);
+      ctx.fill();
 
       ctx.restore();
     }
+
     isDead(){
-      // out of visible area + life exceeded
-      if(this.life > this.maxLife + 200) return true;
-      if(this.x < -200 || this.x > width + 200 || this.y > height + 200) return true;
+      // dead only when fully outside viewport (plus margin)
+      if(this.x < -220 || this.x > width + 220 || this.y > height + 220 || this.y < -220) return true;
       return false;
     }
   }
 
   const meteors = [];
 
-  // spawn logic
-  let lastSpawn = 0;
   function spawnMeteor(){
-    // stop if reduced motion preferred
     if(reduced) return;
     meteors.push(new Meteor());
   }
 
-  function scheduleSpawn(){
-    // interval 2.5-9s typical; sometimes bursts
-    const next = Math.random()*6500 + 1800;
+  function schedule(){
+    const next = Math.random()*7000 + 1800; // 1.8s - 8.8s
     setTimeout(()=>{
-      // sometimes spawn multiple
-      const burst = Math.random() > 0.7 ? Math.floor(Math.random()*3)+1 : 1;
-      for(let i=0;i<burst;i++){
-        setTimeout(spawnMeteor, i*120);
-      }
-      scheduleSpawn();
+      const group = Math.random() > 0.68 ? Math.floor(Math.random()*3)+1 : 1;
+      for(let i=0;i<group;i++) setTimeout(spawnMeteor, i*140);
+      schedule();
     }, next);
   }
-  scheduleSpawn();
+  schedule();
 
-  // main loop
+  // animation loop
   let last = performance.now();
-  function tick(now){
+  function loop(now){
     const dt = now - last;
     last = now;
-    // clear with slight fade for trail persistence (motion blur)
+    // clear canvas
     ctx.clearRect(0,0,width,height);
-    // update & draw meteors
+    // draw each meteor
     for(let i=meteors.length-1;i>=0;i--){
       const m = meteors[i];
       m.update(dt);
       m.draw(ctx);
-      if(m.isDead()){
-        meteors.splice(i,1);
-      }
+      if(m.isDead()) meteors.splice(i,1);
     }
-    requestAnimationFrame(tick);
+    requestAnimationFrame(loop);
   }
-  requestAnimationFrame(tick);
+  requestAnimationFrame(loop);
 
-  // resize handler attached above
 })();
 
-/* Optional: subtle animated bg on canvas (not necessary) */
-(function bgCanvas(){
-  const c = document.getElementById('bgCanvas');
-  const ctx = c.getContext('2d');
-  let w=0,h=0,DPR=Math.max(1,window.devicePixelRatio||1);
-  function resize(){
-    w = innerWidth; h = innerHeight;
-    c.width = Math.floor(w*DPR);
-    c.height = Math.floor(h*DPR);
-    c.style.width = w+'px';
-    c.style.height = h+'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-  }
-  window.addEventListener('resize', resize); resize();
-
-  let t=0;
-  function frame(){
-    t += 0.005;
-    // very subtle moving vignette / haze
-    ctx.clearRect(0,0,w,h);
-    const g = ctx.createRadialGradient(w*0.15, h*0.2, 0, w*0.5, h*0.6, Math.max(w,h));
-    g.addColorStop(0, `rgba(110,10,170,${0.06 + 0.02*Math.sin(t*2)})`);
-    g.addColorStop(1, `rgba(0,0,0,0)`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0,0,w,h);
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
-
-/* Accessibility: respect reduced-motion & reduce spawn */
+/* Accessibility: respect reduced-motion */
 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-  // reduce heavy animations: remove meteors schedule by letting reduced flag handle it
-  console.log('prefers-reduced-motion: reduce — meteor animations decreased or disabled.');
+  console.log('prefers-reduced-motion: reduce — animations reduced.');
 }
 </script>
 </body>
