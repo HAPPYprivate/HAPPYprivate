@@ -4,20 +4,62 @@
 <meta charset="utf-8" />
 <link rel="icon" href="icon.png" type="image/png">
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>🔒</title>
+<title>🔒 Access blocked</title>
 
 <style>
   :root{
-    --bg1: #020007;
-    --bg2: #060014;
-    --accent1: #9b56ff;
-    --muted: #dcd4ff;
+    --accent1: #d14cff;
+    --muted: #e9e3ff;
+    --card-bg: rgba(6,4,12,0.45);
+    --card-border: rgba(160,70,255,0.12);
   }
 
-  html,body{height:100%;margin:0;padding:0;font-family:Inter, "Segoe UI", Roboto, sans-serif;overflow:hidden;background:var(--bg1);color:var(--muted)}
+  html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+    font-family: Inter, "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial;
+    background: #000;
+    color:var(--muted);
+    overflow:hidden;
+  }
 
+  /* full-viewport square GIF centered */
+  .bg-wrap {
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:0;
+    pointer-events:none;
+  }
+
+  .bg-gif {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    object-fit: cover;
+    will-change: width, height, transform;
+    filter: saturate(1.05) contrast(1.02);
+    /* subtle overlay via pseudo element below */
+  }
+
+  /* dim + color overlay above GIF for consistent tint */
+  .bg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(3,1,8,0.25), rgba(3,1,8,0.45));
+    mix-blend-mode: multiply;
+  }
+
+  /* stage for UI */
   .stage{
     position:relative;
+    z-index: 5; /* above bg */
     width:100%;
     height:100%;
     display:flex;
@@ -25,326 +67,143 @@
     justify-content:center;
     flex-direction:column;
     text-align:center;
-    background: linear-gradient(180deg, var(--bg2), var(--bg1));
+    padding:32px;
+    box-sizing:border-box;
+    gap:18px;
   }
 
-  /* canvas for nebula */
-  canvas.bg-canvas {
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    display:block;
-    pointer-events:none;
-    z-index:2;
+  /* glassy card */
+  .card {
+    max-width:920px;
+    width: min(92%, 920px);
+    padding:28px 34px;
+    border-radius:14px;
+    background: var(--card-bg);
+    border:1px solid var(--card-border);
+    box-shadow: 0 10px 40px rgba(10,2,30,0.6);
+    backdrop-filter: blur(10px) saturate(1.05);
+    -webkit-backdrop-filter: blur(10px) saturate(1.05);
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    align-items:center;
   }
 
-  /* static star layer (DOM) */
-  .stars {
-    position:absolute;
-    inset:0;
-    z-index:3;
-    pointer-events:none;
+  /* fancy title */
+  h1 {
+    margin:0;
+    font-size:36px;
+    line-height:1;
+    letter-spacing:0.6px;
+    background: linear-gradient(90deg, #ffd6ff 0%, #d14cff 40%, #8b3bff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 6px 20px rgba(140,40,255,0.18));
+    text-transform: none;
   }
 
-  .star {
-    position:absolute;
-    border-radius:50%;
-    transform:translate3d(0,0,0);
-    pointer-events:none;
-    /* base size & faded border; color & shadow assigned inline by JS */
-    width: 2px;
-    height: 2px;
-    opacity: 0.95;
-    filter: blur(0px);
-    will-change: opacity, transform;
+  /* subtitle / note style */
+  .note {
+    color: rgba(235,224,255,0.95);
+    font-size:16px;
+    max-width:780px;
+    line-height:1.45;
+    text-wrap:balance;
   }
 
-  /* twinkle animation — duration & delay set inline */
-  @keyframes twinkle {
-    0% { opacity: 0.2; transform: scale(0.8); filter: blur(0); }
-    50%{ opacity: 1.0; transform: scale(1.25); filter: blur(0.8px); }
-    100%{ opacity: 0.2; transform: scale(0.9); filter: blur(0); }
+  /* highlight HAPPY script */
+  .note .brand {
+    color: #ffd4ff;
+    font-weight:700;
+    text-shadow: 0 0 10px rgba(209,76,255,0.28);
   }
 
-  /* logo */
+  /* small logo in corner */
   .logo {
     position: fixed;
     left: 18px;
     top: 18px;
-    width: 56px;
-    height: 56px;
+    z-index: 6;
+    width:56px;
+    height:56px;
     border-radius:12px;
     display:flex;
     align-items:center;
     justify-content:center;
     background: linear-gradient(135deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
-    box-shadow: 0 6px 30px rgba(90,10,150,0.12), inset 0 1px 0 rgba(255,255,255,0.02);
-    border:1px solid rgba(150,60,255,0.06);
-    z-index:6;
+    border:1px solid rgba(180,100,255,0.06);
+    box-shadow: 0 8px 30px rgba(70,20,120,0.12);
   }
-  .logo img{width:44px;height:44px;object-fit:contain;border-radius:8px;}
+  .logo img{width:44px;height:44px;border-radius:8px;object-fit:contain}
 
-  /* content */
-  .card {
-    z-index:5;
-    max-width:920px;
-    width:92%;
-    padding:36px 40px;
-    border-radius:16px;
-    background: linear-gradient(180deg, rgba(12,6,25,0.55), rgba(8,2,18,0.35));
-    border:1px solid rgba(120,40,255,0.06);
-    box-shadow: 0 10px 60px rgba(40,10,80,0.45);
-    backdrop-filter: blur(8px) saturate(1.05);
-    display:flex;
-    flex-direction:column;
-    gap:18px;
-    align-items:center;
-  }
-
-  h1 {
-    margin:0;
-    font-size:36px;
-    letter-spacing:0.6px;
-    color:var(--accent1);
-    text-shadow: 0 6px 24px rgba(120,40,255,0.14), 0 1px 0 rgba(255,255,255,0.02);
-  }
-
-  .note {
-    color: #e9e3ff;
-    opacity:0.9;
-    font-size:16px;
-    max-width:780px;
-    line-height:1.45;
-  }
-
+  /* footer */
   .footer {
-    position:fixed;
-    right:12px;
-    bottom:12px;
-    color:rgba(230,220,255,0.28);
+    position: fixed;
+    right: 16px;
+    bottom: 12px;
+    z-index: 6;
+    color: rgba(225,215,245,0.28);
     font-size:12px;
-    z-index:6;
   }
 
+  /* responsive */
   @media (max-width:520px){
-    h1{font-size:28px}
-    .card{padding:20px}
+    h1{font-size:26px}
+    .card{padding:18px}
   }
 </style>
 </head>
 <body>
-  <div class="stage">
-    <canvas class="bg-canvas" id="bgCanvas"></canvas>
-    <div class="stars" id="stars"></div>
 
+  <!-- background GIF (square, centered) -->
+  <div class="bg-wrap" aria-hidden="true">
+    <img id="bgGif" class="bg-gif" src="BackGround.gif" alt="Background animation">
+    <div class="bg-overlay"></div>
+  </div>
+
+  <div class="stage" role="main">
     <div class="logo" aria-hidden="true">
       <img src="icon.png" alt="logo" />
     </div>
 
-    <div class="card" role="main" aria-labelledby="page-title">
+    <div class="card" role="article" aria-labelledby="page-title">
       <h1 id="page-title">🔒 Access blocked</h1>
-      <div class="note">This script is protected by <span style="color: #d14cff; font-weight: 700; text-shadow: 0 0 6px rgba(209, 76, 255, 0.6);">HAPPY script</span>, please do not attempt to view its contents.</div>
+      <div class="note">
+        This script is protected by <span class="brand">HAPPY script</span>, please do not attempt to view its contents.
+      </div>
     </div>
-
 
     <div class="footer">HAPPY·script</div>
   </div>
 
 <script>
-/* ============================
-   Nebula background (unchanged, soft)
-   ============================ */
-(function NebulaBG(){
-  const c = document.getElementById('bgCanvas');
-  const ctx = c.getContext('2d');
-  let w=0,h=0,DPR=Math.max(1,window.devicePixelRatio||1);
+/*
+  Ensure the gif is displayed as a centered square (1:1).
+  We'll set the img width & height = max(innerWidth, innerHeight) so it covers viewport.
+*/
+(function fitSquareGif(){
+  const img = document.getElementById('bgGif');
+
   function resize(){
-    w = innerWidth; h = innerHeight;
-    c.width = Math.floor(w*DPR);
-    c.height = Math.floor(h*DPR);
-    c.style.width = w+'px';
-    c.style.height = h+'px';
-    ctx.setTransform(DPR,0,0,DPR,0,0);
-  }
-  window.addEventListener('resize', resize); resize();
-
-  const blobs = [
-    { xPct: 0.12, yPct: 0.22, radiusFactor: 1.1, phase: Math.random()*Math.PI*2, baseAlpha: 0.16 },
-    { xPct: 0.86, yPct: 0.78, radiusFactor: 0.9, phase: Math.random()*Math.PI*2, baseAlpha: 0.12 }
-  ];
-
-  function draw(t){
-    ctx.clearRect(0,0,w,h);
-    // subtle vignette
-    const vign = ctx.createRadialGradient(w*0.5, h*0.5, 0, w*0.5, h*0.5, Math.max(w,h));
-    vign.addColorStop(0, 'rgba(10,4,20,0.10)');
-    vign.addColorStop(1, 'rgba(0,0,0,0.35)');
-    ctx.fillStyle = vign;
-    ctx.fillRect(0,0,w,h);
-
-    blobs.forEach((b,idx)=>{
-      const time = t * 0.0005;
-      const dx = Math.cos(b.phase + time * (0.3 + idx*0.12)) * (w*0.04);
-      const dy = Math.sin(b.phase*1.3 + time * (0.18 + idx*0.06)) * (h*0.03);
-      const cx = Math.floor(w * b.xPct + dx);
-      const cy = Math.floor(h * b.yPct + dy);
-      const r = Math.max(w,h) * 0.6 * b.radiusFactor;
-      const alpha = b.baseAlpha * (0.7 + 0.4 * Math.sin(b.phase*0.9 + time*0.9));
-      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
-      g.addColorStop(0, `rgba(150,70,255,${(alpha*0.95).toFixed(3)})`);
-      g.addColorStop(0.25, `rgba(110,30,220,${(alpha*0.6).toFixed(3)})`);
-      g.addColorStop(0.6, `rgba(60,0,120,${(alpha*0.22).toFixed(3)})`);
-      g.addColorStop(1, `rgba(0,0,0,0)`);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.fillStyle = g;
-      ctx.fillRect(cx - r*1.05, cy - r*1.05, r*2.1, r*2.1);
-      ctx.globalCompositeOperation = 'source-over';
-    });
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const side = Math.max(w, h); // square side
+    img.style.width = side + 'px';
+    img.style.height = side + 'px';
+    // keep centered via CSS transform translate(-50%,-50%)
   }
 
-  let start = performance.now();
-  function frame(now){
-    draw(now - start);
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-})();
+  // run on load and resize
+  window.addEventListener('load', resize);
+  window.addEventListener('resize', resize);
 
-/* ============================
-   Colored stars layer — realistic spectral palette
-   - No meteors. Stars have colors by spectral type (O,B,A,F,G,K,M)
-   - Weighted distribution favors cooler stars (M, K, G) for visual balance
-   ============================ */
-(function ColoredStars(){
-  const container = document.getElementById('stars');
-  const rnd = (min,max)=>Math.random()*(max-min)+min;
-
-  // spectral types with approximate visual colors and weights
-  // weights biased so colors are visible but still somewhat realistic.
-  const spectral = [
-    { name:'O', color:'#9bb0ff', weight:0.005, sizeRange:[0.9,1.6], glow:0.9 }, // blue (very rare)
-    { name:'B', color:'#aabfff', weight:0.02, sizeRange:[0.8,1.8], glow:0.8 },  // blue-white
-    { name:'A', color:'#cad7ff', weight:0.06, sizeRange:[0.7,1.6], glow:0.6 },  // white-blue
-    { name:'F', color:'#f8f7ff', weight:0.09, sizeRange:[0.7,1.4], glow:0.5 },  // white
-    { name:'G', color:'#fff4d6', weight:0.15, sizeRange:[0.9,1.8], glow:0.6 },  // yellow (like Sun)
-    { name:'K', color:'#ffd2a1', weight:0.3, sizeRange:[0.9,2.0], glow:0.5  },  // orange
-    { name:'M', color:'#ffb3b3', weight:0.37, sizeRange:[1.0,2.6], glow:0.45 }  // red (most common)
-  ];
-
-  // build cumulative weights for selection
-  const totalW = spectral.reduce((s,sp)=>s+sp.weight,0);
-  let cum = 0;
-  const weighted = spectral.map(sp => {
-    cum += sp.weight / totalW;
-    return { ...sp, cum };
-  });
-
-  function pickSpectral(){
-    const v = Math.random();
-    for(let i=0;i<weighted.length;i++) if(v <= weighted[i].cum) return weighted[i];
-    return weighted[weighted.length-1];
-  }
-
-  // number of stars — tuned for density; adjust for performance
-  const baseCount = Math.round((window.innerWidth * window.innerHeight) / 12000); // responsive density
-  const count = Math.min(700, Math.max(120, baseCount)); // clamp between 120 and 700
-
-  // respect reduced-motion: fewer stars and no heavy glow animations
-  const reduced = (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-
-  for(let i=0;i<count;i++){
-    const s = document.createElement('div');
-    s.className = 'star';
-
-    const sp = pickSpectral();
-
-    const size = rnd(sp.sizeRange[0], sp.sizeRange[1]); // base px
-    const scale = (size / 1.5); // scale factor for box-shadow intensity
-    const left = rnd(0,100);
-    const top  = rnd(0,100);
-
-    // random slight shape variance
-    const w = Math.max(1, size) + 'px';
-    const h = Math.max(1, size) + 'px';
-    s.style.width = w;
-    s.style.height = h;
-    s.style.left = left + 'vw';
-    s.style.top  = top + 'vh';
-
-    // twinkle timing
-    const dur = reduced ? rnd(5,9) : rnd(3.5,9);
-    const delay = rnd(0,7);
-
-    // color and glow: create layered boxShadow for subtle halo
-    const c = sp.color;
-    // use different shadow spreads to get crisp center + soft halo
-    const softAlpha = (0.06 + sp.glow * 0.18) * (Math.random()*0.9 + 0.7);
-    const midAlpha  = (0.12 + sp.glow * 0.22) * (Math.random()*0.9 + 0.8);
-    const coreAlpha = (0.9 + sp.glow*0.1) * (0.6 + Math.random()*0.4);
-
-    // apply inline styles: background, boxShadow, borderRadius, opacity, animation
-    s.style.background = c;
-    s.style.boxShadow = `
-      0 0 ${Math.max(2, 1.6 * scale)}px rgba(255,255,255,${Math.min(0.25, coreAlpha*0.12)}),
-      0 0 ${Math.max(6, 4 * scale)}px ${hexToRgba(c, midAlpha)},
-      0 0 ${Math.max(18, 10 * scale)}px ${hexToRgba(c, softAlpha)}
-    `;
-    s.style.opacity = 0.95 * (0.8 + Math.random()*0.25);
-
-    // twinkle animation (randomized)
-    s.style.animation = `twinkle ${dur.toFixed(2)}s ${delay.toFixed(2)}s infinite ease-in-out`;
-    // slight transform origin and will-change
-    s.style.transformOrigin = 'center center';
-    s.style.willChange = 'opacity, transform';
-
-    container.appendChild(s);
-  }
-
-  // helper: convert hex like "#aabbcc" to rgba string with alpha
-  function hexToRgba(hex, a){
-    const h = hex.replace('#','');
-    const r = parseInt(h.substring(0,2),16);
-    const g = parseInt(h.substring(2,4),16);
-    const b = parseInt(h.substring(4,6),16);
-    return `rgba(${r},${g},${b},${a.toFixed(3)})`;
-  }
-
-  // optional: slowly respawn a few stars to create slight movement (fade out & reappear somewhere else)
-  if(!reduced){
-    setInterval(() => {
-      // pick small fraction of stars to reposition with fade
-      const nodes = container.children;
-      const toTouch = Math.max(1, Math.floor(nodes.length * 0.02)); // 2% of stars every interval
-      for(let i=0;i<toTouch;i++){
-        const idx = Math.floor(Math.random()*nodes.length);
-        const el = nodes[idx];
-        if(!el) continue;
-        // fade out, move, fade in
-        el.style.transition = 'opacity 900ms ease, transform 900ms ease, left 900ms ease, top 900ms ease';
-        el.style.opacity = 0;
-        setTimeout(() => {
-          el.style.left = (Math.random()*100) + 'vw';
-          el.style.top  = (Math.random()*100) + 'vh';
-          setTimeout(()=> el.style.opacity = (0.7 + Math.random()*0.3), 60);
-        }, 920 + Math.random()*400);
-        // clear transition after some time to avoid overrides
-        setTimeout(()=> el.style.transition = '', 2400);
-      }
-    }, 4200 + Math.random()*2400);
-  }
-
-  // accessibility: stop animations if user requests reduced motion
-  if (reduced) {
-    Array.from(container.children).forEach(el => {
-      el.style.animation = 'none';
-      el.style.transition = 'none';
-      // reduce glow intensity
-      el.style.boxShadow = el.style.boxShadow.replace(/rgba\([^\)]+\)/g, (m)=> m.replace(/0\.\d+/, '0.06'));
-    });
+  // small accessibility: if prefers-reduced-motion, reduce GIF saturation/contrast
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    img.style.filter = 'grayscale(0.3) contrast(0.95)';
   }
 })();
-
 </script>
+
 </body>
 </html>
