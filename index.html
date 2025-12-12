@@ -40,7 +40,7 @@
     left:50%; top:50%;
     transform:translate(-50%,-50%);
     object-fit:cover;
-    filter:saturate(1.15) brightness(1.08);
+    filter: saturate(1.2) brightness(1.05) blur(14px);
   }
   .bg-overlay{
     position:fixed;
@@ -116,18 +116,6 @@
     opacity:0.5;
   }
 
-  /* floating icons 🔒❌🚫 */
-  .float-icon{
-    position:fixed;
-    font-size:26px;
-    color:#ffcaff;
-    opacity:0.8;
-    pointer-events:none;
-    z-index:3;
-    text-shadow:0 0 12px rgba(255,130,255,0.55);
-    will-change:transform, opacity;
-  }
-
   @media(max-width:520px){
     h1{font-size:28px;}
     .card{padding:22px;}
@@ -165,43 +153,6 @@
   }
   resize();
   addEventListener("resize", resize);
-})();
-
-/* random floating icons: 🔒 ❌ 🚫 */
-(function floatingIcons(){
-  const icons = ["🔒","❌","🚫"];
-  function spawn(){
-    const el = document.createElement("div");
-    el.className = "float-icon";
-    el.textContent = icons[Math.floor(Math.random()*icons.length)];
-
-    const startX = Math.random() * innerWidth;
-    const startY = Math.random() * innerHeight;
-    const endX = innerWidth/2 + (Math.random()*120 - 60);
-    const endY = innerHeight/2 + (Math.random()*120 - 60);
-
-    el.style.left = startX + "px";
-    el.style.top  = startY + "px";
-
-    document.body.appendChild(el);
-
-    const duration = 3500 + Math.random()*1800;
-
-    el.animate([
-      { transform:`translate(0,0) scale(1)`, opacity:0.8 },
-      { transform:`translate(${(endX-startX)*0.7}px, ${(endY-startY)*0.7}px) scale(1.3)`, opacity:1 },
-      { transform:`translate(${endX-startX}px, ${endY-startY}px) scale(0.2)`, opacity:0 }
-    ], {
-      duration,
-      easing:"cubic-bezier(0.22,0.61,0.36,1)",
-      fill:"forwards"
-    });
-
-    setTimeout(()=> el.remove(), duration+200);
-  }
-
-  /* spawn every 0.8–1.8s */
-  setInterval(spawn, 800 + Math.random()*1000);
 })();
 </script>
 
