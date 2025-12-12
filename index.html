@@ -7,14 +7,12 @@
 <title>🔒 Access blocked</title>
 
 <style>
-  /* Fonts cosmic/sci-fi hơn */
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Chakra+Petch:wght@300;400;600&display=swap');
 
   :root{
     --accent: #d14cff;
-    --soft-purple: #f6d4ff;
-    --muted: #e8d8ff;
-    --neon: #e47bff;
+    --soft-purple: #f5d8ff;
+    --muted: #eaddff;
     --card-bg: rgba(10,3,25,0.42);
     --card-border: rgba(185,110,255,0.18);
   }
@@ -23,10 +21,13 @@
     height:100%;
     margin:0;
     padding:0;
+
+    /* Font tổng thể: Chakra Petch – vibe cyber-tech */
+    font-family: "Chakra Petch", "Space Grotesk", Inter, system-ui, sans-serif;
+
     background:#000;
-    overflow:hidden;
     color:var(--muted);
-    font-family: "Space Grotesk", Inter, system-ui, sans-serif;
+    overflow:hidden;
   }
 
   /* background GIF */
@@ -42,14 +43,14 @@
     left:50%; top:50%;
     transform:translate(-50%,-50%);
     object-fit:cover;
-    filter: saturate(1.25) brightness(1.06) blur(9px);
+    filter: saturate(1.2) brightness(1.05) blur(7px);
   }
   .bg-overlay{
     position:fixed;
     inset:0;
     z-index:1;
     pointer-events:none;
-    background: radial-gradient(circle at center, rgba(55,0,90,0.25), rgba(0,0,0,0.6));
+    background: radial-gradient(circle at center, rgba(40,0,70,0.25), rgba(0,0,0,0.55));
   }
 
   .stage{
@@ -60,88 +61,86 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:32px;
     text-align:center;
+    padding:32px;
   }
 
   .card{
     max-width:880px;
     width:min(92%,880px);
-    padding:36px 42px;
-    border-radius:20px;
+    padding:34px 40px;
+    border-radius:16px;
     background:var(--card-bg);
     border:1px solid var(--card-border);
-    backdrop-filter:blur(14px) saturate(1.35);
-    box-shadow:0 10px 55px rgba(120,40,200,0.55);
-    display:flex;
-    flex-direction:column;
-    gap:18px;
+    backdrop-filter:blur(12px) saturate(1.25);
+    box-shadow:0 10px 50px rgba(80,20,150,0.55);
+    display:flex; flex-direction:column;
+    gap:14px;
   }
 
-  /* Cosmic Header */
+  /* TIÊU ĐỀ – Orbitron: chuẩn sci-fi space */
   h1{
     margin:0;
     font-family:"Orbitron", sans-serif;
-    font-size:44px;
+    font-size:40px;
     font-weight:800;
     letter-spacing:2px;
-    background:linear-gradient(90deg,#ffe9ff 0%, #d14cff 40%, #923aff 100%);
+
+    background:linear-gradient(90deg,#ffe9ff 0%, #d14cff 40%, #8a3aff 100%);
     -webkit-background-clip:text;
     color:transparent;
-    text-shadow:
-      0 0 22px rgba(215,100,255,0.65),
-      0 0 36px rgba(150,60,255,0.45);
-    transform: translateZ(0);
+
+    text-shadow:0 0 22px rgba(190,50,255,0.55);
   }
 
-  /* Nội dung */
+  /* TEXT PHỤ – Chakra Petch */
   .note{
     font-size:18px;
-    line-height:1.5;
+    font-weight:300;
     color:var(--soft-purple);
+    letter-spacing:0.3px;
   }
 
+  /* BRAND – nổi bật hơn */
   .brand{
-    font-family:"Orbitron", sans-serif;
-    color:#ffbaff;
+    color:#ffcbff;
     font-weight:700;
+    font-family:"Orbitron", sans-serif;
     letter-spacing:1px;
-    text-shadow:
-      0 0 12px rgba(255,140,255,0.7),
-      0 0 20px rgba(255,120,255,0.45);
+    text-shadow:0 0 14px rgba(255,140,255,0.65);
   }
 
   .logo{
-    position:fixed; left:20px; top:20px;
+    position:fixed; left:18px; top:18px;
     z-index:6;
     width:56px; height:56px;
-    border-radius:14px;
-    border:1px solid rgba(210,140,255,0.16);
-    display:flex;
-    align-items:center; justify-content:center;
+    border-radius:12px;
+    border:1px solid rgba(210,140,255,0.12);
+    display:flex; align-items:center; justify-content:center;
     background:rgba(255,255,255,0.04);
-    box-shadow:0 8px 40px rgba(140,60,255,0.38);
+    box-shadow:0 8px 40px rgba(120,60,255,0.35);
   }
-  .logo img{
-    width:44px; height:44px; border-radius:10px;
-  }
+  .logo img{width:44px; height:44px; border-radius:10px;}
 
   .footer{
     position:fixed;
-    right:20px; bottom:16px;
+    bottom:14px;
+    right:18px;
     z-index:6;
-    font-size:14px;
-    opacity:0.55;
+    font-size:12px;
+
     font-family:"Orbitron", sans-serif;
     letter-spacing:1px;
-    color:var(--muted);
+
+    opacity:0.5;
   }
 
   @media(max-width:520px){
-    h1{font-size:30px;}
-    .card{padding:24px;}
+    h1{font-size:28px;}
+    .card{padding:22px;}
   }
 </style>
+
 </head>
 <body>
 
@@ -154,16 +153,17 @@
   <div class="logo"><img src="icon.png"></div>
 
   <div class="card">
-    <h1>·ACCESS BLOCKED·</h1>
+    <h1>·Access blocked·</h1>
     <div class="note">
-      This script is protected by <span class="brand">HAPPY SCRIPT</span>, please do not attempt to view its contents.
+      This script is protected by <span class="brand">HAPPY script</span>, please do not attempt to view its contents.
     </div>
   </div>
 
-  <div class="footer">HAPPY·SCRIPT</div>
+  <div class="footer">HAPPY·script</div>
 </div>
 
 <script>
+/* background GIF auto scale to perfect square */
 (function(){
   const img = document.getElementById("bgGif");
   function resize(){
