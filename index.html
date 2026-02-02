@@ -1,1 +1,360 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HAPPY · Protected Page</title>
 
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg-0: #060408;
+    --bg-1: #0b0710;
+    --panel: rgba(18,10,26,0.6);
+    --glass-border: rgba(170,100,255,0.12);
+    --accent: #9b3cff; /* purple */
+    --accent-2: #5b1eff;
+    --muted: #cfc6df;
+    --glow: 0 8px 40px rgba(155,60,255,0.14);
+    --radius: 14px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%; margin:0; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  body{
+    background: radial-gradient(1200px 700px at 10% 20%, rgba(155,60,255,0.12), transparent),
+                radial-gradient(900px 600px at 85% 80%, rgba(90,30,255,0.08), transparent),
+                linear-gradient(180deg,var(--bg-0), var(--bg-1));
+    color:var(--muted);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+
+  /* Container */
+  .wrap{
+    width:min(980px,94%);
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:calc(var(--radius) + 4px);
+    padding:28px;
+    box-shadow:var(--glow);
+    position:relative;
+    overflow:hidden;
+  }
+
+  /* left decorative stripe */
+  .wrap::before{
+    content:"";
+    position:absolute;
+    left:-120px; top:-120px; width:420px; height:420px;
+    background:conic-gradient(from 180deg at 50% 50%, rgba(155,60,255,0.14), rgba(91,30,255,0.08), transparent 50%);
+    transform:rotate(18deg);
+    filter:blur(40px);
+    pointer-events:none;
+  }
+
+  header{
+    display:flex;
+    gap:18px;
+    align-items:center;
+    margin-bottom:12px;
+  }
+
+  /* badge / logo */
+  .brand-badge{
+    display:inline-grid;
+    place-items:center;
+    width:72px; height:72px;
+    border-radius:14px;
+    background:linear-gradient(135deg, rgba(155,60,255,0.16), rgba(91,30,255,0.08));
+    border:1px solid var(--glass-border);
+    box-shadow:0 6px 30px rgba(90,30,255,0.12);
+    flex-shrink:0;
+  }
+  .brand-badge svg{width:42px;height:42px;display:block}
+
+  h1{
+    margin:0;
+    font-size:20px;
+    letter-spacing:0.6px;
+    color: #fff;
+    font-weight:700;
+  }
+  .subtitle{
+    margin:6px 0 0 0;
+    color:var(--muted);
+    font-size:13px;
+    opacity:0.95;
+  }
+
+  main{
+    display:flex;
+    gap:24px;
+    align-items:stretch;
+    margin-top:18px;
+  }
+
+  /* left panel - message */
+  .panel{
+    flex:1 1 520px;
+    background:var(--panel);
+    border-radius:12px;
+    padding:20px;
+    border:1px solid var(--glass-border);
+    backdrop-filter: blur(8px) saturate(1.05);
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+  }
+
+  .panel .lead{
+    font-size:16px;
+    font-weight:600;
+    color: #fff;
+    margin-bottom:8px;
+  }
+  .panel p{margin:0;color:var(--muted);line-height:1.45;font-size:14px}
+
+  /* right panel - actions */
+  .actions{
+    width:260px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .btn{
+    display:inline-flex;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    border-radius:10px;
+    padding:12px 14px;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid transparent;
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    transition:transform .14s ease, box-shadow .14s ease;
+    user-select:none;
+  }
+  .btn:active{transform:translateY(1px)}
+
+  /* Discord button */
+  .btn.discord{
+    color:white;
+    background:linear-gradient(180deg,var(--accent), var(--accent-2));
+    box-shadow:0 12px 30px rgba(91,30,255,0.18), 0 4px 10px rgba(0,0,0,0.35);
+    border:1px solid rgba(255,255,255,0.06);
+  }
+  .btn.discord svg{width:20px;height:20px;flex-shrink:0}
+
+  /* Copy button */
+  .btn.copy{
+    color:var(--muted);
+    background:linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.005));
+    border:1px solid rgba(140,80,255,0.08);
+  }
+  .btn.copy svg{width:18px;height:18px;opacity:0.95}
+
+  .small{
+    font-size:12px; opacity:0.9; margin-top:8px; color:var(--muted)
+  }
+
+  /* footer info */
+  .meta{
+    margin-top:14px;
+    display:flex;
+    gap:12px;
+    align-items:center;
+    color:var(--muted);
+    font-size:12px;
+    opacity:0.9;
+  }
+
+  /* toast */
+  .toast{
+    position:fixed;
+    left:50%;
+    transform:translateX(-50%) translateY(12px);
+    bottom:24px;
+    background:rgba(20,8,30,0.9);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:10px;
+    border:1px solid rgba(155,60,255,0.12);
+    box-shadow:0 10px 40px rgba(80,30,150,0.2);
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+    z-index:9999;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+
+  /* responsive */
+  @media(max-width:820px){
+    main{flex-direction:column-reverse}
+    .actions{width:100%}
+  }
+
+  @media(max-width:520px){
+    .brand-badge{width:56px; height:56px}
+    h1{font-size:18px}
+    .wrap{padding:18px}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap" role="main" aria-labelledby="pageTitle">
+  <header>
+    <div class="brand-badge" aria-hidden="true">
+      <!-- geometric badge – subtle HAPPY mark -->
+      <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="4" y="4" width="56" height="56" rx="12" fill="url(#g)"/>
+        <path d="M18 40c6-12 28-12 32 0" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+        <defs>
+          <linearGradient id="g" x1="0" x2="1">
+            <stop offset="0" stop-color="#8a3aff"/>
+            <stop offset="1" stop-color="#d14cff"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <div>
+      <h1 id="pageTitle">HAPPY · Protected</h1>
+      <div class="subtitle">Trang được bảo vệ — nội dung mã nằm dưới quyền kiểm soát</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="panel" aria-label="Thông tin">
+      <div>
+        <div class="lead">Trạng thái: Nội dung bị ẩn</div>
+        <p>
+          Đây là một trang chặn hiển thị chuyên nghiệp. Bạn có thể chuyển sang kênh hỗ trợ bằng nút Discord, hoặc sao chép nội dung script để dán vào nơi khác.
+        </p>
+      </div>
+
+      <div>
+        <div class="meta">
+          <div>HAPPY script</div>
+          <div>·</div>
+          <div>Thiết kế: chuyên nghiệp • Tím/Đen</div>
+        </div>
+      </div>
+    </section>
+
+    <aside class="actions" aria-label="Các hành động">
+      <!-- Button: Open Discord -->
+      <button class="btn discord" id="openDiscord" title="Mở Discord">
+        <!-- Discord icon (SVG) -->
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="white" d="M20.317 4.369A19.791 19.791 0 0016.89 3a14.394 14.394 0 00-.688 1.445 18.7 18.7 0 00-5.416 0A14.256 14.256 0 009.09 3 19.736 19.736 0 004.68 4.37 22.972 22.972 0 002 12.002a22.69 22.69 0 007.292 5.85c.534-.73 1.02-1.487 1.447-2.266a15.977 15.977 0 01-3.49-1.054c.292-.217.577-.447.854-.69 3.356 1.55 7.01 1.55 10.36 0 .276.246.562.476.854.69a16.22 16.22 0 01-3.487 1.054c.425.78.91 1.536 1.447 2.266A22.69 22.69 0 0022 12.002c0-1.675-.263-3.31-.733-4.933zM9.725 15.089c-1.182 0-2.146-1.085-2.146-2.419 0-1.334.95-2.418 2.146-2.418 1.205 0 2.168 1.084 2.146 2.418 0 1.334-.94 2.419-2.146 2.419zm4.555 0c-1.182 0-2.146-1.085-2.146-2.419 0-1.334.95-2.418 2.146-2.418 1.205 0 2.168 1.084 2.146 2.418 0 1.334-.94 2.419-2.146 2.419z"></path>
+        </svg>
+        Mở Discord
+      </button>
+
+      <!-- Button: Copy script -->
+      <button class="btn copy" id="copyScript" title="Sao chép script">
+        <!-- clipboard icon -->
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M16 2h-4.5a1 1 0 0 0-.95.68L9 6H6a2 2 0 0 0-2 2v9a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a2 2 0 0 0-2-2h-1l-1.55-3.32A1 1 0 0 0 16 2zM8.5 4h3l.75 1.6A1 1 0 0 0 13.1 6H10.9a1 1 0 0 0-.65-.4L8.5 4z"/>
+        </svg>
+        Copy script
+      </button>
+
+      <div class="small">Lưu ý: dán script vào vùng dưới rồi nhấn "Copy script".</div>
+    </aside>
+  </main>
+</div>
+
+<!-- Toast -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<!--
+  Chèn script của bạn vào <textarea id="scriptSource"> bên dưới.
+  * Giữ nguyên vùng này trong file HTML.
+  * Khi bạn dán script thật (các thẻ <script> hoặc mã Lua/JS...), nút "Copy script" sẽ sao chép nguyên văn nội dung vùng này.
+-->
+<textarea id="scriptSource" style="position:fixed; left:-9999px; top:-9999px; width:1px; height:1px; opacity:0; pointer-events:none;" aria-hidden="true">
+<!--
+  Paste your script here. Example:
+  <script>console.log("Hello world")</script>
+
+  Thay dòng này bằng script bạn muốn copy (giữ nguyên định dạng).
+-->
+</textarea>
+
+<script>
+(function(){
+  // CONFIG: đổi link Discord ở đây nếu cần
+  const DISCORD_LINK = "https://discord.gg/Y5r4f4BYtm";
+
+  const btnDiscord = document.getElementById("openDiscord");
+  const btnCopy = document.getElementById("copyScript");
+  const scriptSource = document.getElementById("scriptSource");
+  const toast = document.getElementById("toast");
+
+  function showToast(msg, ms = 2000){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(()=> toast.classList.remove('show'), ms);
+  }
+
+  btnDiscord.addEventListener('click', function(){
+    // open in new tab (user intent)
+    window.open(DISCORD_LINK, '_blank', 'noopener,noreferrer');
+  });
+
+  btnCopy.addEventListener('click', async function(){
+    const text = scriptSource.value || "";
+    if(!text.trim()){
+      showToast("Vùng script đang rỗng — hãy dán script vào file trước.");
+      return;
+    }
+
+    // Try modern clipboard API
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        await navigator.clipboard.writeText(text);
+      } else {
+        // fallback
+        fallbackCopy(text);
+      }
+      showToast("Đã copy script vào clipboard");
+    } catch(err){
+      // fallback and inform
+      try { fallbackCopy(text); showToast("Đã copy (fallback)"); }
+      catch(e){ showToast("Copy thất bại — hãy copy thủ công"); }
+    }
+  });
+
+  function fallbackCopy(text){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    // keep offscreen
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(!ok) throw new Error('fallback copy failed');
+  }
+
+  // Accessibility: allow keyboard activation
+  btnDiscord.addEventListener('keyup', e => { if(e.key === 'Enter') btnDiscord.click(); });
+  btnCopy.addEventListener('keyup', e => { if(e.key === 'Enter') btnCopy.click(); });
+
+})();
+</script>
+</body>
+</html>
