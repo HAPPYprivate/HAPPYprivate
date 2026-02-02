@@ -1,198 +1,309 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="vi">
 <head>
-<meta charset="utf-8" />
-<link rel="icon" href="icon.png" type="image/png">
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>🔒 Access blocked</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HAPPY · Portfolio</title>
+  <link rel="icon" href="icon.png" />
 
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Chakra+Petch:wght@300;400;600&display=swap');
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
-  :root{
-    --accent: #d14cff;
-    --soft-purple: #f5d8ff;
-    --muted: #eaddff;
-    --card-bg: rgba(10,3,25,0.42);
-    --card-border: rgba(185,110,255,0.18);
-  }
+  <style>
+    :root{
+      --bg:#050206;
+      --panel: rgba(20,8,28,0.6);
+      --glass: rgba(255,255,255,0.04);
+      --accent:#b85bff;        /* main purple */
+      --accent-2:#7f3bff;      /* darker purple */
+      --muted:#cfc5df;
+      --radius:14px;
+      --maxw:1100px;
+    }
 
-  html,body{
-    height:100%;
-    margin:0;
-    padding:0;
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:var(--bg);color:var(--muted);font-family:"Poppins",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
 
-    /* Font tổng thể: Chakra Petch – vibe cyber-tech */
-    font-family: "Chakra Petch", "Space Grotesk", Inter, system-ui, sans-serif;
+    /* Subtle animated gradient blobs (decorative) */
+    .bg-decor{
+      position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;
+      background:
+        radial-gradient(800px 500px at 10% 10%, rgba(124,58,237,0.12), transparent 10%),
+        radial-gradient(700px 420px at 90% 85%, rgba(184,91,255,0.10), transparent 10%);
+      filter: blur(28px);
+      transform: translateZ(0);
+    }
+    .bg-blip{
+      position:absolute; width:560px; height:560px; border-radius:50%;
+      top:8%; left:6%;
+      background: linear-gradient(135deg, rgba(184,91,255,0.22), rgba(127,59,255,0.14));
+      animation: floatA 14s ease-in-out infinite;
+      mix-blend-mode:screen;
+    }
+    .bg-blip--2{
+      width:680px; height:680px; right:4%; left:auto; top:50%; background:linear-gradient(120deg, rgba(80,35,160,0.18), rgba(184,91,255,0.14));
+      animation: floatB 18s ease-in-out infinite;
+    }
+    @keyframes floatA{ 0%{transform:translateY(0)}50%{transform:translateY(-30px)}100%{transform:translateY(0)}}
+    @keyframes floatB{ 0%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(20px) rotate(6deg)}100%{transform:translateY(0) rotate(0deg)}}
 
-    background:#000;
-    color:var(--muted);
-    overflow:hidden;
-  }
+    /* Page container */
+    .wrap{position:relative;z-index:2;max-width:var(--maxw);margin:48px auto;padding:28px;display:grid;grid-template-columns:1fr;gap:28px}
 
-  /* background GIF */
-  .bg-wrap{
-    position:fixed; inset:0;
-    display:flex;
-    align-items:center; justify-content:center;
-    z-index:0;
-    pointer-events:none;
-  }
-  .bg-gif{
-    position:absolute;
-    left:50%; top:50%;
-    transform:translate(-50%,-50%);
-    object-fit:cover;
-    filter: saturate(1.2) brightness(1.05) blur(10px);
-  }
-  .bg-overlay{
-    position:fixed;
-    inset:0;
-    z-index:1;
-    pointer-events:none;
-    background: radial-gradient(circle at center, rgba(40,0,70,0.25), rgba(0,0,0,0.55));
-  }
+    /* Top area */
+    header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .brand{
+      display:flex;align-items:center;gap:12px;
+    }
+    .logo{
+      width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;font-family:"Orbitron";font-weight:700;color:#fff;font-size:20px;box-shadow:0 8px 30px rgba(140,60,200,0.22);
+    }
+    .title{
+      display:flex;flex-direction:column;
+    }
+    .title .who{font-family:"Orbitron";letter-spacing:1px;font-weight:700;font-size:16px;color:#fff}
+    .title .tag{font-size:12px;color:var(--muted)}
 
-  .stage{
-      position:relative;
-      z-index:5;
-      width:100%;
-      height:100%;
+    nav{display:flex;gap:12px}
+    .nav-btn{padding:8px 12px;border-radius:10px;background:var(--glass);border:1px solid rgba(255,255,255,0.03);font-size:14px;cursor:pointer;transition:all .18s}
+    .nav-btn:hover{transform:translateY(-3px);box-shadow:0 6px 22px rgba(120,60,220,0.06)}
 
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
+    /* Hero card */
+    .hero{
+      display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:center;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);padding:28px;border:1px solid rgba(200,160,255,0.05);
+      box-shadow: 0 12px 40px rgba(40,10,60,0.45);
+      backdrop-filter: blur(8px);
+    }
+    .hero-left h1{margin:0;font-family:"Orbitron";font-size:34px;color:#fff;letter-spacing:1px}
+    .hero-left p{margin:12px 0 18px;color:var(--muted);line-height:1.5}
+    .ctas{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{
+      display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;font-weight:600;cursor:pointer;border:0;
+    }
+    .btn-primary{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 8px 30px rgba(160,80,240,0.18)}
+    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
 
-      padding:0;
-      box-sizing:border-box;
-  }
+    /* Sidebar card (profile) */
+    .profile{
+      background: linear-gradient(180deg, rgba(20,10,30,0.6), rgba(12,6,22,0.55));
+      padding:18px;border-radius:12px;border:1px solid rgba(180,120,255,0.06);
+    }
+    .avatar{width:86px;height:86px;border-radius:12px;overflow:hidden;margin-bottom:12px;background:linear-gradient(180deg,#fff1,#0002)}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block}
+    .meta{font-size:13px;color:var(--muted);margin-bottom:8px}
+    .links{display:flex;gap:8px;flex-wrap:wrap}
 
-  .card{
-    max-width:880px;
-    width:min(92%,880px);
-    padding:34px 40px;
-    border-radius:16px;
-    background:var(--card-bg);
-    border:1px solid var(--card-border);
-    backdrop-filter:blur(12px) saturate(1.25);
-    box-shadow:0 10px 50px rgba(80,20,150,0.55);
-    display:flex; flex-direction:column;
-    gap:14px;
-  }
+    /* Projects */
+    .projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+    .card{
+      background:var(--panel);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);backdrop-filter:blur(6px);
+    }
+    .card h3{margin:0 0 8px 0;font-size:16px;font-family:"Orbitron"}
+    .card p{margin:0 0 12px;color:var(--muted);font-size:13px;line-height:1.4}
+    .meta-row{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
 
-  /* TIÊU ĐỀ – Orbitron: chuẩn sci-fi space */
-  h1{
-    margin:0;
-    font-family:"Orbitron", sans-serif;
-    font-size:40px;
-    font-weight:800;
-    letter-spacing:2px;
+    /* Footer */
+    footer{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;color:var(--muted);font-size:13px}
 
-    background:linear-gradient(90deg,#ffe9ff 0%, #d14cff 40%, #8a3aff 100%);
-    -webkit-background-clip:text;
-    color:transparent;
+    /* Responsive */
+    @media(max-width:880px){
+      .hero{grid-template-columns:1fr}
+      header{flex-direction:column;align-items:flex-start;gap:12px}
+    }
 
-    text-shadow:0 0 22px rgba(190,50,255,0.55);
-  }
-
-  /* TEXT PHỤ – Chakra Petch */
-  .note{
-    font-size:18px;
-    font-weight:300;
-    color:var(--soft-purple);
-    letter-spacing:0.3px;
-  }
-
-  /* BRAND – nổi bật hơn */
-  .brand{
-    color:#ffcbff;
-    font-weight:700;
-    font-family:"Orbitron", sans-serif;
-    letter-spacing:1px;
-    text-shadow:0 0 14px rgba(255,140,255,0.65);
-  }
-
-  .logo{
-      position:fixed; left:18px; top:18px;
-      z-index:6;
-      width:56px; height:56px;
-      border-radius:12px;
-      border:1px solid rgba(210,140,255,0.12);
-      display:flex; align-items:center; justify-content:center;
-      background:rgba(255,255,255,0.04);
-      box-shadow:0 8px 40px rgba(120,60,255,0.35);
-      cursor:pointer;
-      transition:0.25s ease;
-  }
-  /* hover: viền sáng tím + glow mạnh */
-  .logo:hover{
-      border-color:#d14cff;
-      box-shadow:0 0 12px rgba(209,76,255,0.8),
-                 0 0 24px rgba(209,76,255,0.45);
-      background:rgba(255,255,255,0.07);
-  }
-  .logo img{width:44px; height:44px; border-radius:10px;}
-
-  .footer{
-    position:fixed;
-    bottom:14px;
-    right:18px;
-    z-index:6;
-    font-size:12px;
-
-    font-family:"Orbitron", sans-serif;
-    letter-spacing:1px;
-
-    opacity:0.5;
-  }
-
-  @media(max-width:520px){
-    h1{font-size:28px;}
-    .card{padding:22px;}
-  }
-</style>
-
+    /* small helper */
+    .muted{color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:rgba(255,255,255,0.45)}
+    .chip{padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:12px}
+  </style>
 </head>
 <body>
 
-<div class="bg-wrap">
-  <img id="bgGif" class="bg-gif" src="BackGround.gif">
-  <div class="bg-overlay"></div>
-</div>
-
-<div class="stage">
-  <div class="logo"><img src="icon.png"></div>
-
-  <div class="card">
-    <h1>·Access blocked·</h1>
-    <div class="note">
-      This script is protected by <span class="brand">HAPPY script</span>, please do not attempt to view its contents.
-    </div>
+  <div class="bg-decor" aria-hidden="true">
+    <div class="bg-blip"></div>
+    <div class="bg-blip bg-blip--2"></div>
   </div>
 
-  <div class="footer">HAPPY·script</div>
-</div>
+  <main class="wrap" role="main">
+    <!-- header -->
+    <header>
+      <div class="brand" aria-label="HAPPY brand">
+        <div class="logo">HS</div>
+        <div class="title">
+          <div class="who">HAPPY · script</div>
+          <div class="tag small">Scripter · Dev tools · Roblox & Web</div>
+        </div>
+      </div>
 
-<script>
-/* background GIF auto scale to perfect square */
-(function(){
-  const img = document.getElementById("bgGif");
-  function resize(){
-    const s = Math.max(innerWidth, innerHeight);
-    img.style.width = s + "px";
-    img.style.height = s + "px";
-  }
-  resize();
-  addEventListener("resize", resize);
-})();
+      <nav aria-label="Điều hướng">
+        <button class="nav-btn" onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">Projects</button>
+        <button class="nav-btn" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">About</button>
+        <button class="nav-btn" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Contact</button>
+      </nav>
+    </header>
 
-/* open Discord on click */
-document.querySelector(".logo").addEventListener("click", function(){
-    window.open("https://discord.gg/Y5r4f4BYtm", "_blank");
-});
-</script>
+    <!-- hero -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-left">
+        <h1 id="hero-title">Thiết kế sạch — mã gọn — tối ưu hiệu năng</h1>
+        <p>Trang chính thức của HAPPY script. Tôi xây các công cụ, script Roblox và trang web nhỏ — code được tối giản, giữ logic rõ ràng và dễ mở rộng.</p>
+
+        <div class="ctas">
+          <button class="btn btn-primary" onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">Xem dự án</button>
+          <button class="btn btn-ghost" onclick="copyToClipboard('https://discord.gg/Y5r4f4BYtm')">Discord • Sao chép link</button>
+          <a class="btn btn-ghost" href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
+        </div>
+
+        <p class="muted" style="margin-top:14px">Tùy chỉnh: thay avatar, links, và mô tả trong file <code>index.html</code>.</p>
+      </div>
+
+      <aside class="profile" aria-labelledby="profile-name">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="avatar" aria-hidden="true">
+            <!-- Thay bằng avatar hoặc icon.png -->
+            <img src="avatar.png" alt="avatar">
+          </div>
+          <div>
+            <div id="profile-name" style="font-weight:600;color:#fff">HAPPY script</div>
+            <div class="meta">Scripter • Roblox Studio • Web Dev</div>
+            <div class="small">Đang online</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="links">
+          <button class="chip" onclick="copyToClipboard('HAPPY#1234')">Sao chép tag Discord</button>
+          <a class="chip" href="mailto:you@example.com">Email</a>
+          <a class="chip" href="https://github.com/your-username" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </aside>
+    </section>
+
+    <!-- projects -->
+    <section id="projects">
+      <h2 style="font-family:Orbitron;margin:0 0 12px 0;color:#fff">Projects</h2>
+      <div class="projects">
+        <article class="card" aria-labelledby="p1">
+          <h3 id="p1">Roblox — Optimized Loader</h3>
+          <p>Script loader gọn nhẹ, support reservation, clamp, và safe-lock. Tối ưu để tránh race condition trên game scale.</p>
+          <div class="meta-row">
+            <span class="small">Lua · Roblox Studio</span>
+            <div>
+              <a class="small" href="#" onclick="alert('Replace with real GitHub link')">View</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="card" aria-labelledby="p2">
+          <h3 id="p2">Dev Tools • Web</h3>
+          <p>Web utility pages (status, fetch tools) được viết tối giản, ít dependency, dễ deploy lên GitHub Pages.</p>
+          <div class="meta-row">
+            <span class="small">HTML · JS</span>
+            <a class="small" href="#" onclick="alert('Replace with real GitHub link')">View</a>
+          </div>
+        </article>
+
+        <article class="card" aria-labelledby="p3">
+          <h3 id="p3">Package • Snippets</h3>
+          <p>Thư viện đoạn mã ngắn, comment rõ ràng, dễ nhúng vào dự án lớn hoặc plugin.</p>
+          <div class="meta-row">
+            <span class="small">Snippets</span>
+            <a class="small" href="#" onclick="alert('Replace with real GitHub link')">View</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- about -->
+    <section id="about" style="margin-top:6px">
+      <h2 style="font-family:Orbitron;margin:0 0 12px 0;color:#fff">About</h2>
+
+      <div class="card" style="display:flex;gap:18px;flex-direction:column">
+        <p class="muted" style="margin:0">
+          Mình chuyên tối giản code: giữ <strong>logic rõ ràng</strong>, <strong>performance</strong> tốt, và <strong>dễ bảo trì</strong>. Nếu bạn muốn:
+        </p>
+
+        <ul style="margin:8px 0 0 18px;color:var(--muted);line-height:1.6">
+          <li>Script cho Roblox Studio (Lua) — tập trung vào hiệu năng</li>
+          <li>Landing page / GitHub Pages — nhẹ, responsive</li>
+          <li>Tooling cho dev: snippets, loaders, helpers</li>
+        </ul>
+
+        <p class="small" style="margin-top:8px">Gửi yêu cầu qua Discord / Email — mình trả lời nhanh.</p>
+      </div>
+    </section>
+
+    <!-- contact -->
+    <section id="contact" style="margin-top:6px">
+      <h2 style="font-family:Orbitron;margin:0 0 12px 0;color:#fff">Contact</h2>
+
+      <div class="card" style="display:flex;gap:12px;flex-direction:column">
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <div style="flex:1">
+            <div class="small">Discord</div>
+            <div style="margin-top:6px;display:flex;gap:8px;align-items:center">
+              <input id="discordInput" value="https://discord.gg/Y5r4f4BYtm" readonly style="flex:1;padding:10px;border-radius:8px;border:0;background:rgba(0,0,0,0.25);color:var(--muted)">
+              <button class="btn btn-primary" onclick="copyToClipboard(document.getElementById('discordInput').value)">Copy</button>
+            </div>
+          </div>
+
+          <div style="width:270px">
+            <div class="small">Email</div>
+            <div style="margin-top:6px;display:flex;gap:8px">
+              <input id="emailInput" value="you@example.com" readonly style="flex:1;padding:10px;border-radius:8px;border:0;background:rgba(0,0,0,0.25);color:var(--muted)">
+              <a class="btn btn-ghost" href="mailto:you@example.com">Send</a>
+            </div>
+          </div>
+        </div>
+
+        <p class="small">Hoặc mở issue trên GitHub repo nếu có bugs / request.</p>
+      </div>
+    </section>
+
+    <footer>
+      <div class="small">© <strong>HAPPY script</strong> — Built with minimal, maintainable code.</div>
+      <div class="small">Theme: purple · black</div>
+    </footer>
+  </main>
+
+  <script>
+    // Copy to clipboard helper
+    function copyToClipboard(text) {
+      if (!text) return;
+      navigator.clipboard?.writeText(text).then(()=>{
+        toast('Copied to clipboard!');
+      }).catch(()=>{
+        // fallback
+        const t = document.createElement('textarea');
+        t.value = text; document.body.appendChild(t); t.select();
+        try { document.execCommand('copy'); toast('Copied to clipboard!'); } catch(e){ alert('Please copy manually: ' + text); }
+        t.remove();
+      });
+    }
+
+    // Simple toast
+    function toast(msg){
+      const id = 'toast-box';
+      let el = document.getElementById(id);
+      if(!el){
+        el = document.createElement('div'); el.id=id;
+        el.style.cssText = 'position:fixed;right:20px;bottom:20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);color:#fff;padding:10px 14px;border-radius:10px;font-weight:600;z-index:9999';
+        document.body.appendChild(el);
+      }
+      el.textContent = msg;
+      el.style.opacity = '1';
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(()=>{ el.style.opacity='0'; }, 1800);
+    }
+
+    // Accessibility: keyboard focus outlines
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Tab') document.documentElement.style.scrollBehavior = 'smooth';
+    });
+  </script>
 
 </body>
 </html>
