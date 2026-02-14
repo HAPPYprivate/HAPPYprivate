@@ -19,6 +19,9 @@
       --muted: #cfc6dd;
       --glass: rgba(255,255,255,0.03);
       --radius: 14px;
+      --pink: #ff66b2;
+      --tealviolet-1: #7c3aed;
+      --tealviolet-2: #5eead4; /* for subtle teal */
     }
 
     *{box-sizing:border-box}
@@ -38,10 +41,11 @@
     /* animated soft blobs (subtle, slow) */
     .blobs {
       position:absolute;
-      inset: -10%;
+      inset: -20%;
       z-index:0;
       pointer-events:none;
       overflow:hidden;
+      transition: transform 0.5s ease-out;
     }
     .blob {
       position:absolute;
@@ -52,15 +56,27 @@
       opacity:0.64;
       mix-blend-mode: screen;
       transform: translate3d(0,0,0);
-      transition: transform 0.25s linear;
+      transition: transform 0.6s ease-out;
     }
-    .blob.b1 { left:-12%; top:-8%; background: radial-gradient(circle at 30% 30%, rgba(155,60,255,0.95), rgba(90,26,214,0.55) 40%, rgba(90,26,214,0.10) 70%); animation: float1 20s linear infinite; }
+    .blob.b1 { left:-12%; top:-8%; background: radial-gradient(circle at 30% 30%, rgba(255,102,178,0.95), rgba(155,60,255,0.55) 40%, rgba(90,26,214,0.10) 70%); animation: float1 20s linear infinite; }
     .blob.b2 { right:-8%; top:10%; width:420px; height:420px; background: radial-gradient(circle at 65% 35%, rgba(120,50,255,0.85), rgba(60,20,140,0.45) 40%, rgba(10,6,20,0.08) 80%); animation: float2 26s linear infinite; opacity:0.5; }
     .blob.b3 { left:20%; bottom:-14%; width:640px; height:640px; background: radial-gradient(circle at 20% 80%, rgba(80,36,200,0.75), rgba(30,12,80,0.32) 40%, rgba(5,3,8,0.02) 85%); animation: float3 34s linear infinite; opacity:0.38; }
 
-    @keyframes float1{ 0%{ transform: translateY(0) translateX(0) scale(1);} 50%{ transform: translateY(18px) translateX(-18px) scale(1.03);} 100%{ transform: translateY(0) translateX(0) scale(1);} }
-    @keyframes float2{ 0%{ transform: translateY(0) translateX(0) scale(1);} 50%{ transform: translateY(-14px) translateX(12px) scale(0.99);} 100%{ transform: translateY(0) translateX(0) scale(1);} }
-    @keyframes float3{ 0%{ transform: translateY(0) translateX(0) scale(1);} 50%{ transform: translateY(22px) translateX(22px) scale(1.02);} 100%{ transform: translateY(0) translateX(0) scale(1);} }
+    @keyframes float1{
+      0%{ transform: translateY(0) translateX(0) scale(1); }
+      50%{ transform: translateY(18px) translateX(-18px) scale(1.03); }
+      100%{ transform: translateY(0) translateX(0) scale(1); }
+    }
+    @keyframes float2{
+      0%{ transform: translateY(0) translateX(0) scale(1); }
+      50%{ transform: translateY(-14px) translateX(12px) scale(0.99); }
+      100%{ transform: translateY(0) translateX(0) scale(1); }
+    }
+    @keyframes float3{
+      0%{ transform: translateY(0) translateX(0) scale(1); }
+      50%{ transform: translateY(22px) translateX(22px) scale(1.02); }
+      100%{ transform: translateY(0) translateX(0) scale(1); }
+    }
 
     /* glass card */
     .card {
@@ -77,60 +93,15 @@
       box-shadow: 0 20px 60px rgba(10,6,30,0.6);
       backdrop-filter: blur(10px) saturate(1.1);
       align-items:start;
-      overflow:visible;
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .card:hover { transform: translateY(-6px); box-shadow: 0 34px 80px rgba(10,6,30,0.7); }
-
-    /* SHIMMER (controlled by JS: add .shimmer to card to run once) */
-    .card::before{
-      content:"";
-      position:absolute;
-      left:-150%;
-      top:0;
-      height:100%;
-      width:50%;
-      transform: skewX(-18deg) translateX(0);
-      pointer-events:none;
-      opacity:0;
-      background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.28) 50%, rgba(255,255,255,0) 100%);
-      mix-blend-mode: overlay;
-      filter: blur(6px) saturate(1.3);
-      transition: opacity .12s linear;
-    }
-    /* animation only present when .shimmer class exists; we remove class after animationend */
-    .card.shimmer::before {
-      animation: shimmerMove .9s ease forwards;
-      opacity:1;
-    }
-    @keyframes shimmerMove {
-      0%   { left:-150%; opacity:0; transform: skewX(-18deg) translateX(0) scale(1); }
-      10%  { opacity:0.9; }
-      50%  { left:120%; opacity:0.9; transform: skewX(-18deg) translateX(8%) scale(1.02); }
-      100% { left:120%; opacity:0; transform: skewX(-18deg) translateX(8%) scale(1.02); }
+      transform: translateY(8px);
+      opacity: 0;
+      animation: cardIn .6s ease forwards;
     }
 
-    /* tiny sparkles that fly across the card */
-    .spark {
-      position:absolute;
-      width:8px;
-      height:8px;
-      border-radius:50%;
-      pointer-events:none;
-      background: radial-gradient(circle at 40% 30%, #fff, rgba(255,255,255,0.9) 30%, rgba(155,60,255,0.85) 70%, rgba(155,60,255,0.1) 100%);
-      box-shadow: 0 0 10px rgba(155,60,255,0.9), 0 0 22px rgba(90,26,214,0.45);
-      transform: translate3d(0,0,0) scale(.6);
-      opacity:0;
-      will-change: transform, opacity;
-    }
-    @keyframes sparkFly {
-      0% { opacity:0; transform: translateY(0) translateX(0) scale(.6) rotate(0deg); }
-      10% { opacity:1; scale:1; }
-      80% { opacity:0.9; transform: translateY(-20px) translateX(var(--tx)) scale(1.1) rotate(30deg); }
-      100% { opacity:0; transform: translateY(-40px) translateX(calc(var(--tx) * 1.3)) scale(.6) rotate(60deg); }
+    @keyframes cardIn {
+      to { transform: translateY(0); opacity: 1; }
     }
 
-    /* brand/title */
     .brand {
       display:inline-block;
       font-family: "JetBrains Mono", monospace;
@@ -142,8 +113,103 @@
       border-radius:10px;
       background:linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.04));
     }
-    h1{ margin:12px 0 6px 0; font-size:30px; color:#fff; line-height:1.05; font-weight:700; text-shadow: 0 6px 30px rgba(90,26,214,0.08); }
-    p.sub { margin:0; color:#d9cff0; opacity:0.9; font-size:14px; }
+
+    /* Title with two-tone glossy text */
+    h1{
+      margin:12px 0 6px 0;
+      font-size:40px;
+      color:#fff;
+      line-height:1.02;
+      font-weight:800;
+      text-shadow: 0 8px 30px rgba(90,26,214,0.06);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* HAPPY (pink glossy) */
+    .title-part {
+      display:inline-block;
+      position:relative;
+      padding:4px 6px;
+      border-radius:8px;
+    }
+
+    .happy {
+      font-weight:900;
+      background: linear-gradient(90deg, #ff66b2, #ff3fa0 60%, #ff77c9 90%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 6px 18px rgba(255,102,178,0.14));
+      position:relative;
+    }
+
+    /* small glossy gloss overlay using pseudo element */
+    .happy::after {
+      content: "";
+      position:absolute;
+      left:0; right:0; top:0; bottom:0;
+      border-radius:8px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
+      mix-blend-mode: overlay;
+      pointer-events:none;
+      opacity:0.4;
+      transform: skewX(-18deg) translateY(-8px);
+    }
+
+    /* script (purple-teal glossy) */
+    .script {
+      font-weight:800;
+      background: linear-gradient(90deg, var(--tealviolet-1), var(--tealviolet-2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 8px 26px rgba(124,58,237,0.16));
+      position:relative;
+    }
+
+    /* shimmer animation across title */
+    .shimmer {
+      position:absolute;
+      left:-40%;
+      top:-10%;
+      width:200%;
+      height:120%;
+      pointer-events:none;
+      background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0) 100%);
+      transform: rotate(-12deg);
+      animation: shimmerMove 3.2s linear infinite;
+      mix-blend-mode: overlay;
+      opacity:0.8;
+    }
+    @keyframes shimmerMove {
+      0%{ transform: translateX(-100%) rotate(-12deg); }
+      100%{ transform: translateX(100%) rotate(-12deg); }
+    }
+
+    p.sub {
+      margin:0;
+      color:#d9cff0;
+      opacity:0.95;
+      font-size:14px;
+    }
+
+    /* subtle floating icons near title */
+    .title-decor {
+      position:relative;
+      display:inline-block;
+    }
+    .small-ico {
+      position:absolute;
+      width:14px; height:14px;
+      opacity:0.85;
+    }
+    .ico-1 { right:-28px; top:-8px; transform: rotate(-16deg); animation: icoFloat 4s ease-in-out infinite; }
+    .ico-2 { left:-26px; bottom:-12px; transform: rotate(8deg); animation: icoFloat 5s ease-in-out infinite; }
+    @keyframes icoFloat {
+      0%{ transform: translateY(0) rotate(0); }
+      50%{ transform: translateY(-6px) rotate(6deg); }
+      100%{ transform: translateY(0) rotate(0); }
+    }
 
     /* controls column */
     .controls {
@@ -153,7 +219,10 @@
       align-items:stretch;
       justify-content:flex-start;
     }
+
     .btn {
+      position:relative;
+      overflow: hidden;
       display:flex;
       align-items:center;
       gap:12px;
@@ -167,63 +236,87 @@
       transition: all .16s ease;
       background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.05));
       color:var(--muted);
-      overflow:hidden;
-      position:relative;
     }
     .btn:active{ transform: translateY(1px); }
-    .btn.primary{ color:#fff; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border:none; box-shadow: 0 8px 28px rgba(155,60,255,0.16); }
+
+    .btn.primary{
+      color:#fff;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      border:none;
+      box-shadow: 0 8px 28px rgba(155,60,255,0.16);
+    }
+
+    /* pulse glow for primary */
+    .btn.primary::before{
+      content:"";
+      position:absolute; inset:-6px;
+      border-radius:inherit;
+      background: radial-gradient(closest-side, rgba(155,60,255,0.12), transparent);
+      z-index:0;
+      opacity:0;
+      transition: opacity .28s ease;
+      pointer-events:none;
+    }
+    .btn.primary:hover::before{ opacity:1; transform: scale(1.02); }
+
     .btn.icon-left { justify-content:flex-start; }
-    .btn .icon { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; font-size:18px; }
 
-    /* small toggle style */
-    .toggle {
-      display:inline-flex;
-      align-items:center;
-      gap:10px;
-      padding:8px;
-      background: rgba(255,255,255,0.02);
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,0.03);
-      justify-content:space-between;
-      font-weight:600;
-    }
-    .switch {
-      width:44px; height:24px; border-radius:999px; position:relative; background:rgba(255,255,255,0.06); cursor:pointer;
-      box-shadow: inset 0 -2px 6px rgba(0,0,0,0.4);
-    }
-    .switch .knob{ position:absolute; left:3px; top:3px; width:18px; height:18px; border-radius:50%; background:white; transition: all .18s ease; transform: scale(.92); }
-    .switch.on { background: linear-gradient(90deg,var(--accent),var(--accent-2)); }
-    .switch.on .knob { left:23px; transform: scale(1); box-shadow: 0 6px 18px rgba(90,26,214,0.18); }
+    .btn .icon { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; font-size:18px; z-index:1; }
 
-    /* toast */
+    /* ripple effect for copy */
+    .ripple {
+      position:absolute; border-radius:50%; transform: scale(0);
+      background: rgba(255,255,255,0.12);
+      animation: rippleAnim 600ms ease-out;
+      pointer-events:none;
+    }
+    @keyframes rippleAnim {
+      to { transform: scale(4); opacity:0; }
+    }
+
     .toast{
       position:fixed;
       left:50%;
-      transform:translateX(-50%) translateY(12px);
+      transform:translateX(-50%);
       bottom:36px;
-      background: rgba(20,8,35,0.92);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(20,8,35,0.92));
       color:white;
-      padding:10px 14px;
-      border-radius:10px;
+      padding:10px 18px;
+      border-radius:999px;
       box-shadow: 0 8px 30px rgba(20,6,45,0.6);
-      font-weight:600;
+      font-weight:700;
+      display:flex;
+      gap:10px;
+      align-items:center;
       z-index:9999;
       opacity:0;
+      transform-origin:center;
+      transition: all 280ms cubic-bezier(.2,.9,.1,1);
       pointer-events:none;
-      transition: all .28s cubic-bezier(.2,.9,.22,1);
-      will-change: opacity, transform;
     }
-    .toast.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.show { opacity:1; transform: translateX(-50%) translateY(0); pointer-events:auto; }
 
-    .foot { margin-top:12px; color:#cdbff0; font-size:13px; opacity:0.9; }
-    @media (max-width:880px){ .card{ grid-template-columns: 1fr; } }
+    /* confetti canvas overlay (covers whole window) */
+    #confettiCanvas { position:fixed; inset:0; pointer-events:none; z-index:9998; }
+
+    .foot {
+      margin-top:12px;
+      color:#cdbff0;
+      font-size:13px;
+      opacity:0.95;
+    }
+
+    @media (max-width:880px){
+      .card{ grid-template-columns: 1fr; }
+    }
+
   </style>
 </head>
 <body>
 
   <div class="wrap" role="main" aria-labelledby="title">
     <!-- decorative blobs -->
-    <div class="blobs" aria-hidden="true">
+    <div class="blobs" aria-hidden="true" id="blobs">
       <div class="blob b1"></div>
       <div class="blob b2"></div>
       <div class="blob b3"></div>
@@ -232,7 +325,26 @@
     <div class="card" id="card" aria-live="polite">
       <div>
         <span class="brand">HAPPY · script</span>
-        <h1 id="title">Access Restricted</h1>
+
+        <!-- Updated title: HAPPY (pink glossy) + script (purple-teal glossy) -->
+        <h1 id="title" aria-label="HAPPY script">
+          <span class="title-part title-decor">
+            <span class="happy">HAPPY</span>
+            <!-- little decorative icon -->
+            <svg class="small-ico ico-1" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 2L13.4 8.6L20 9.6L14.5 13.8L16.2 20L12 16.8L7.8 20L9.5 13.8L4 9.6L10.6 8.6L12 2Z" fill="white" opacity="0.06"/>
+            </svg>
+          </span>
+
+          <span class="title-part">
+            <span class="script">script</span>
+            <div class="shimmer" aria-hidden="true"></div>
+            <svg class="small-ico ico-2" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <circle cx="12" cy="12" r="10" fill="white" opacity="0.03"></circle>
+            </svg>
+          </span>
+        </h1>
+
         <div class="foot" aria-hidden="true">Please don't try to read the script anymore 😥</div>
       </div>
 
@@ -246,18 +358,17 @@
           <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
           <span>Copy script</span>
         </button>
-
-        <div class="toggle" title="Toggle visual effects">
-          <div style="font-size:13px">Effects</div>
-          <div id="switch" class="switch on" role="button" aria-pressed="true" tabindex="0">
-            <div class="knob"></div>
-          </div>
-        </div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite">Copied</div>
+  <div class="toast" id="toast" role="status" aria-live="polite">
+    <span id="toastIcon"><i class="fa-solid fa-check"></i></span>
+    <span id="toastText">Copied</span>
+  </div>
+
+  <!-- Confetti canvas -->
+  <canvas id="confettiCanvas" width="800" height="600" aria-hidden="true"></canvas>
 
   <!-- Hidden: place your script here. Keep type="text/plain" so it does not execute. -->
   <script id="scriptContent" type="text/plain">
@@ -270,24 +381,32 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
     const DISCORD_URL = "https://discord.gg/Y5r4f4BYtm";
 
     // Elements
-    const card = document.getElementById("card");
     const discordBtn = document.getElementById("discordBtn");
     const copyBtn = document.getElementById("copyBtn");
     const toast = document.getElementById("toast");
+    const toastText = document.getElementById("toastText");
     const scriptTag = document.getElementById("scriptContent");
-    const switchEl = document.getElementById("switch");
-    let effectsEnabled = true;
-    let shimmerTimer = null;
+    const blobs = document.getElementById("blobs");
+    const confettiCanvas = document.getElementById("confettiCanvas");
+    const ctx = confettiCanvas.getContext('2d');
+
+    // Responsive canvas size
+    function fitCanvas(){
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    fitCanvas();
+    window.addEventListener('resize', fitCanvas);
 
     // Open Discord safely
     discordBtn.addEventListener("click", () => {
       window.open(DISCORD_URL, "_blank", "noopener,noreferrer");
     });
 
-    // Copy script
+    // Copy script logic
     async function copyScript(){
       const txt = scriptTag.textContent.trim();
-      if(!txt){ showToast("No script available"); return; }
+      if(!txt){ showToast("No script available", false); return; }
       try {
         if(navigator.clipboard && navigator.clipboard.writeText){
           await navigator.clipboard.writeText(txt);
@@ -301,22 +420,40 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
           document.execCommand("copy");
           document.body.removeChild(ta);
         }
-        // small copy feedback (button pulse)
-        copyBtn.animate([{ transform: 'scale(1)' }, { transform: 'scale(.98)' }, { transform: 'scale(1)' }], { duration: 180 });
-        showToast("Copied");
+        showToast("Copied", true);
+        launchConfetti();
       } catch(err){
-        showToast("Copy failed");
+        showToast("Copy failed", false);
       }
     }
-    copyBtn.addEventListener("click", copyScript);
+    copyBtn.addEventListener("click", (ev) => {
+      // ripple effect
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      const rect = ev.currentTarget.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.width = r.style.height = size + 'px';
+      r.style.left = (ev.clientX - rect.left - size/2) + 'px';
+      r.style.top = (ev.clientY - rect.top - size/2) + 'px';
+      ev.currentTarget.appendChild(r);
+      setTimeout(()=> r.remove(), 650);
+      copyScript();
+    });
 
     // Toast helper
     let tTimer = null;
-    function showToast(msg){
-      toast.textContent = msg;
-      toast.classList.add("show");
+    function showToast(msg, success=true){
+      toastText.textContent = msg;
+      toast.classList.add('show');
+      if(success){
+        toast.style.background = "linear-gradient(90deg, rgba(124,58,237,0.14), rgba(94,234,212,0.06))";
+        document.getElementById('toastIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
+      } else {
+        toast.style.background = "linear-gradient(90deg, rgba(255,80,80,0.10), rgba(20,8,35,0.92))";
+        document.getElementById('toastIcon').innerHTML = '<i class="fa-solid fa-xmark"></i>';
+      }
       clearTimeout(tTimer);
-      tTimer = setTimeout(()=> { toast.classList.remove("show"); }, 1800);
+      tTimer = setTimeout(()=> { toast.classList.remove('show'); }, 2400);
     }
 
     // Shortcut: Ctrl/Cmd + Shift + C to copy
@@ -329,121 +466,82 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       }
     });
 
-    // ---------- VISUAL EFFECTS: shimmer + sparkles ----------
-    function triggerShimmer() {
-      if(!effectsEnabled) return;
-      // Add class, then remove after animation ends
-      card.classList.add('shimmer');
-      const onEnd = () => {
-        card.classList.remove('shimmer');
-        card.removeEventListener('animationend', onEnd);
-      };
-      // fallback removal after 1.2s in case animationend not fired
-      setTimeout(()=> card.classList.remove('shimmer'), 1200);
-    }
-
-    // schedule shimmer occasionally with random interval
-    function scheduleShimmerLoop() {
-      clearTimeout(shimmerTimer);
-      const wait = 5000 + Math.random() * 11000; // 5s - 16s
-      shimmerTimer = setTimeout(()=> {
-        triggerShimmer();
-        scheduleShimmerLoop();
-      }, wait);
-    }
-
-    // sparkles: create small divs that animate then remove
-    function makeSpark(x, y) {
-      if(!effectsEnabled) return;
-      const s = document.createElement('div');
-      s.className = 'spark';
-      // place relative to card
-      const rect = card.getBoundingClientRect();
-      // set starting position within card bounds
-      const startX = Math.max(8, Math.min(rect.width - 8, x - rect.left));
-      const startY = Math.max(8, Math.min(rect.height - 8, y - rect.top));
-      s.style.left = (startX - 4) + 'px';
-      s.style.top = (startY - 4) + 'px';
-      // random travel in X: -40..40 px
-      const tx = (Math.random() * 80 - 40) + 'px';
-      s.style.setProperty('--tx', tx);
-      card.appendChild(s);
-      // trigger CSS animation with random duration and delay
-      const dur = 900 + Math.random() * 700;
-      s.style.animation = `sparkFly ${dur}ms cubic-bezier(.2,.8,.2,1) forwards`;
-      // cleanup after
-      setTimeout(()=> {
-        if(s && s.parentNode) s.parentNode.removeChild(s);
-      }, dur + 80);
-    }
-
-    // random sparkles across card occasionally
-    let sparkleInterval = null;
-    function startSparkles() {
-      sparkleInterval = setInterval(()=> {
-        if(!effectsEnabled) return;
-        const rect = card.getBoundingClientRect();
-        // create 1-3 sparkles at random positions
-        const n = 1 + Math.floor(Math.random()*3);
-        for(let i=0;i<n;i++){
-          const x = rect.left + 20 + Math.random() * (rect.width - 40);
-          const y = rect.top + 20 + Math.random() * (rect.height - 40);
-          makeSpark(x,y);
-        }
-      }, 1600 + Math.random()*2000);
-    }
-    function stopSparkles() { clearInterval(sparkleInterval); sparkleInterval = null; }
-
-    // optional: make sparkle on mousemove for micro-interaction
-    let lastSparkAt = 0;
-    card.addEventListener('mousemove', (ev) => {
-      if(!effectsEnabled) return;
-      const now = Date.now();
-      // limit frequency
-      if(now - lastSparkAt > 280) {
-        makeSpark(ev.clientX, ev.clientY);
-        lastSparkAt = now;
-      }
-      // parallax blobs follow cursor slightly
-      const wrap = document.querySelector('.wrap');
-      const wrect = wrap.getBoundingClientRect();
-      const cx = (ev.clientX - wrect.left) / wrect.width; // 0..1
-      const cy = (ev.clientY - wrect.top) / wrect.height;
-      document.querySelectorAll('.blob').forEach((b, idx) => {
-        const depth = (idx+1) * 6; // different depth
-        b.style.transform = `translate3d(${(cx-0.5)*depth}px, ${(cy-0.5)*depth}px, 0)`;
-      });
+    // Parallax blobs following mouse slightly
+    window.addEventListener('mousemove', (e) => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      const nx = (e.clientX / w) - 0.5;
+      const ny = (e.clientY / h) - 0.5;
+      // gentle translate
+      const max = 20;
+      blobs.style.transform = `translate3d(${ -nx * max }px, ${ -ny * max }px, 0)`;
     });
 
-    // switch toggle for effects
-    function setEffects(on) {
-      effectsEnabled = !!on;
-      switchEl.classList.toggle('on', effectsEnabled);
-      switchEl.setAttribute('aria-pressed', effectsEnabled ? 'true' : 'false');
-      if(effectsEnabled) {
-        scheduleShimmerLoop();
-        if(!sparkleInterval) startSparkles();
-      } else {
-        clearTimeout(shimmerTimer);
-        stopSparkles();
-        // remove any existing spark nodes
-        document.querySelectorAll('.spark').forEach(s => s.remove());
-        // reset blobs transform
-        document.querySelectorAll('.blob').forEach(b => b.style.transform = '');
-      }
+    // CONFETTI: lightweight canvas confetti implementation
+    let confettiPieces = [];
+    function rand(min, max){ return Math.random() * (max - min) + min; }
+    function createPiece(x, y){
+      return {
+        x: x,
+        y: y,
+        vx: rand(-6,6),
+        vy: rand(-12, -6),
+        r: rand(6,12),
+        rot: rand(0,360),
+        vr: rand(-8,8),
+        color: ['#ff66b2','#ffb3e6','#7c3aed','#5eead4','#ffd166'][Math.floor(rand(0,5))],
+        life: 0,
+        ttl: rand(60,100)
+      };
     }
 
-    switchEl.addEventListener('click', ()=> setEffects(!effectsEnabled));
-    switchEl.addEventListener('keypress', (e) => { if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setEffects(!effectsEnabled); }} );
+    function launchConfetti(){
+      const count = 80;
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      for(let i=0;i<count;i++){
+        confettiPieces.push(createPiece(cx + rand(-80,80), cy + rand(-40,40)));
+      }
+      if(!confettiRunning) startConfettiLoop();
+    }
 
-    // init
-    scheduleShimmerLoop();
-    startSparkles();
+    let confettiRunning = false;
+    function startConfettiLoop(){
+      confettiRunning = true;
+      (function loop(){
+        ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+        for(let i = confettiPieces.length -1; i>=0; i--){
+          const p = confettiPieces[i];
+          p.vy += 0.4; // gravity
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+          p.life++;
+          // draw
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot * Math.PI/180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.6);
+          ctx.restore();
 
-    // expose for debugging (optional)
-    window._HAPPY = {
-      triggerShimmer, makeSpark, setEffects
-    };
+          if(p.life > p.ttl || p.y > confettiCanvas.height + 50){
+            confettiPieces.splice(i,1);
+          }
+        }
+        if(confettiPieces.length > 0){
+          requestAnimationFrame(loop);
+        } else {
+          confettiRunning = false;
+          ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+        }
+      })();
+    }
+
+    // Accessibility: announce initial title change (screen readers)
+    const titleEl = document.getElementById('title');
+    titleEl.setAttribute('role','heading');
+
   })();
   </script>
 
