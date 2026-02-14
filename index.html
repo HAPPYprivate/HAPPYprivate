@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="icon" href="logo.png" type="image/png">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HAPPY · script</title>
+  <link rel="icon" href="logo.png" type="image/png">
 
   <!-- Fonts + Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
@@ -12,349 +12,240 @@
 
   <style>
     :root{
-      --bg-1: #040006;
-      --bg-2: #0f0714;
-      --accent: #9b3cff;
-      --accent-2: #5a1ad6;
-      --muted: #cfc6dd;
+      --bg-a: #040006;
+      --bg-b: #0f0714;
       --glass: rgba(255,255,255,0.03);
+      --muted: #cfc6dd;
+      --accent-1: #ff66b2;       /* pink for HAPPY */
+      --accent-2: linear-gradient(90deg,#7c3aed,#5eead4); /* purple-teal for script */
+      --card-border: rgba(155,60,255,0.10);
       --radius: 14px;
-      --pink: #ff66b2;
-      --tealviolet-1: #7c3aed;
-      --tealviolet-2: #5eead4; /* for subtle teal */
+      --glass-strong: rgba(255,255,255,0.04);
+      --focus: 3px;
     }
 
+    /* Reset & base */
     *{box-sizing:border-box}
-    html,body{height:100%; margin:0; font-family:"Poppins",system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background:linear-gradient(180deg,var(--bg-1),var(--bg-2)); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;}
+    html,body{height:100%; margin:0; font-family:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,var(--bg-a),var(--bg-b)); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-    /* container */
+    /* Layout */
     .wrap{
       min-height:100vh;
       display:flex;
       align-items:center;
       justify-content:center;
-      padding:36px;
+      padding:28px;
       position:relative;
       overflow:hidden;
     }
 
-    /* animated soft blobs (subtle, slow) */
-    .blobs {
-      position:absolute;
+    /* subtle background blobs (performant: only CSS gradients + slow animation) */
+    .bg-blur {
+      position: absolute;
       inset: -20%;
       z-index:0;
       pointer-events:none;
-      overflow:hidden;
-      transition: transform 0.5s ease-out;
+      background:
+        radial-gradient(400px 300px at 10% 20%, rgba(255,102,178,0.12), transparent 20%),
+        radial-gradient(360px 260px at 85% 70%, rgba(124,58,237,0.10), transparent 18%),
+        radial-gradient(520px 420px at 20% 85%, rgba(94,234,212,0.06), transparent 25%);
+      filter: blur(48px) saturate(1.05);
+      transform: translateZ(0);
+      animation: bgDrift 28s linear infinite;
+      opacity:0.9;
     }
-    .blob {
-      position:absolute;
-      width:520px;
-      height:520px;
-      border-radius:50%;
-      filter: blur(92px) saturate(1.12);
-      opacity:0.64;
-      mix-blend-mode: screen;
-      transform: translate3d(0,0,0);
-      transition: transform 0.6s ease-out;
-    }
-    .blob.b1 { left:-12%; top:-8%; background: radial-gradient(circle at 30% 30%, rgba(255,102,178,0.95), rgba(155,60,255,0.55) 40%, rgba(90,26,214,0.10) 70%); animation: float1 20s linear infinite; }
-    .blob.b2 { right:-8%; top:10%; width:420px; height:420px; background: radial-gradient(circle at 65% 35%, rgba(120,50,255,0.85), rgba(60,20,140,0.45) 40%, rgba(10,6,20,0.08) 80%); animation: float2 26s linear infinite; opacity:0.5; }
-    .blob.b3 { left:20%; bottom:-14%; width:640px; height:640px; background: radial-gradient(circle at 20% 80%, rgba(80,36,200,0.75), rgba(30,12,80,0.32) 40%, rgba(5,3,8,0.02) 85%); animation: float3 34s linear infinite; opacity:0.38; }
-
-    @keyframes float1{
-      0%{ transform: translateY(0) translateX(0) scale(1); }
-      50%{ transform: translateY(18px) translateX(-18px) scale(1.03); }
-      100%{ transform: translateY(0) translateX(0) scale(1); }
-    }
-    @keyframes float2{
-      0%{ transform: translateY(0) translateX(0) scale(1); }
-      50%{ transform: translateY(-14px) translateX(12px) scale(0.99); }
-      100%{ transform: translateY(0) translateX(0) scale(1); }
-    }
-    @keyframes float3{
-      0%{ transform: translateY(0) translateX(0) scale(1); }
-      50%{ transform: translateY(22px) translateX(22px) scale(1.02); }
-      100%{ transform: translateY(0) translateX(0) scale(1); }
+    @keyframes bgDrift {
+      0%{ transform: translateX(0) translateY(0) }
+      50%{ transform: translateX(12px) translateY(-8px) }
+      100%{ transform: translateX(0) translateY(0) }
     }
 
-    /* glass card */
+    /* Card */
     .card {
-      position:relative;
       z-index:2;
       width:min(920px,96%);
       border-radius:var(--radius);
-      padding:28px;
+      padding:34px;
       display:grid;
-      grid-template-columns: 1fr 300px;
-      gap:20px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.14));
-      border: 1px solid rgba(155,60,255,0.12);
-      box-shadow: 0 20px 60px rgba(10,6,30,0.6);
-      backdrop-filter: blur(10px) saturate(1.1);
+      grid-template-columns: 1fr 320px;
+      gap:22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
+      border: 1px solid var(--card-border);
+      box-shadow: 0 18px 48px rgba(6,6,12,0.6);
+      backdrop-filter: blur(10px) saturate(1.06);
       align-items:start;
-      transform: translateY(8px);
-      opacity: 0;
-      animation: cardIn .6s ease forwards;
+      transition: transform .32s ease, box-shadow .32s ease;
+    }
+    .card:focus-within { box-shadow: 0 28px 68px rgba(6,6,12,0.7); transform: translateY(-4px); }
+
+    @media (max-width:900px){
+      .card{ grid-template-columns: 1fr; padding:20px; gap:16px; }
     }
 
-    @keyframes cardIn {
-      to { transform: translateY(0); opacity: 1; }
-    }
-
+    /* Brand */
     .brand {
       display:inline-block;
       font-family: "JetBrains Mono", monospace;
       font-weight:700;
-      color:var(--accent);
-      letter-spacing:0.8px;
-      font-size:12px;
+      color: #caa9ff;
+      letter-spacing:0.6px;
+      font-size:11px;
       padding:6px 10px;
-      border-radius:10px;
-      background:linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.04));
+      border-radius:9px;
+      background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03));
     }
 
-    /* Title with two-tone glossy text */
-    h1{
-      margin:12px 0 6px 0;
-      font-size:40px;
-      color:#fff;
-      line-height:1.02;
+    /* Title */
+    h1 {
+      margin:14px 0 6px;
+      font-size:36px;
+      color: #fff;
+      line-height:1.03;
       font-weight:800;
-      text-shadow: 0 8px 30px rgba(90,26,214,0.06);
       display:flex;
-      gap:10px;
+      gap:12px;
       align-items:center;
+      position:relative;
     }
 
     /* HAPPY (pink glossy) */
-    .title-part {
-      display:inline-block;
-      position:relative;
-      padding:4px 6px;
-      border-radius:8px;
-    }
-
     .happy {
       font-weight:900;
-      background: linear-gradient(90deg, #ff66b2, #ff3fa0 60%, #ff77c9 90%);
+      font-size:1.05em;
+      background: linear-gradient(90deg, var(--accent-1), #ff3fa0 70%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 6px 18px rgba(255,102,178,0.14));
+      filter: drop-shadow(0 6px 16px rgba(255,102,178,0.12));
       position:relative;
-    }
-
-    /* small glossy gloss overlay using pseudo element */
-    .happy::after {
-      content: "";
-      position:absolute;
-      left:0; right:0; top:0; bottom:0;
-      border-radius:8px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02));
-      mix-blend-mode: overlay;
-      pointer-events:none;
-      opacity:0.4;
-      transform: skewX(-18deg) translateY(-8px);
     }
 
     /* script (purple-teal glossy) */
     .script {
       font-weight:800;
-      background: linear-gradient(90deg, var(--tealviolet-1), var(--tealviolet-2));
+      font-size:1.05em;
+      background: var(--accent-2);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 8px 26px rgba(124,58,237,0.16));
+      filter: drop-shadow(0 8px 22px rgba(124,58,237,0.12));
       position:relative;
     }
 
-    /* shimmer animation across title */
-    .shimmer {
-      position:absolute;
-      left:-40%;
-      top:-10%;
-      width:200%;
-      height:120%;
-      pointer-events:none;
-      background: linear-gradient(90deg, rgba(255,255,255,0.0) 0%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0) 100%);
-      transform: rotate(-12deg);
-      animation: shimmerMove 3.2s linear infinite;
-      mix-blend-mode: overlay;
-      opacity:0.8;
-    }
-    @keyframes shimmerMove {
-      0%{ transform: translateX(-100%) rotate(-12deg); }
-      100%{ transform: translateX(100%) rotate(-12deg); }
+    /* small shimmer line under title (subtle) */
+    .title-shim {
+      height:6px;
+      border-radius:6px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
+      width:60%;
+      margin-top:10px;
+      opacity:0.45;
     }
 
-    p.sub {
-      margin:0;
-      color:#d9cff0;
-      opacity:0.95;
-      font-size:14px;
-    }
+    /* subtitle */
+    .lead { margin-top:6px; color:#d9cff0; opacity:0.9; font-size:14px; }
 
-    /* subtle floating icons near title */
-    .title-decor {
-      position:relative;
-      display:inline-block;
-    }
-    .small-ico {
-      position:absolute;
-      width:14px; height:14px;
-      opacity:0.85;
-    }
-    .ico-1 { right:-28px; top:-8px; transform: rotate(-16deg); animation: icoFloat 4s ease-in-out infinite; }
-    .ico-2 { left:-26px; bottom:-12px; transform: rotate(8deg); animation: icoFloat 5s ease-in-out infinite; }
-    @keyframes icoFloat {
-      0%{ transform: translateY(0) rotate(0); }
-      50%{ transform: translateY(-6px) rotate(6deg); }
-      100%{ transform: translateY(0) rotate(0); }
-    }
-
-    /* controls column */
-    .controls {
-      display:flex;
-      flex-direction:column;
-      gap:12px;
-      align-items:stretch;
-      justify-content:flex-start;
-    }
-
+    /* Controls */
+    .controls{ display:flex; flex-direction:column; gap:12px; align-items:stretch; justify-content:flex-start; }
     .btn {
       position:relative;
-      overflow: hidden;
+      overflow:hidden;
       display:flex;
-      align-items:center;
       gap:12px;
+      align-items:center;
+      justify-content:center;
       padding:12px 14px;
       border-radius:10px;
       cursor:pointer;
       user-select:none;
-      border:1px solid rgba(255,255,255,0.03);
-      font-weight:600;
+      border:1px solid rgba(255,255,255,0.04);
+      font-weight:700;
       font-size:15px;
-      transition: all .16s ease;
-      background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.05));
+      transition: transform .12s ease, box-shadow .12s ease, background .18s ease;
+      background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.04));
       color:var(--muted);
     }
-    .btn:active{ transform: translateY(1px); }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus { outline: none; box-shadow: 0 0 0 var(--focus) rgba(124,58,237,0.14); }
 
-    .btn.primary{
-      color:#fff;
-      background: linear-gradient(90deg, var(--accent), var(--accent-2));
-      border:none;
-      box-shadow: 0 8px 28px rgba(155,60,255,0.16);
+    .btn.primary {
+      background: linear-gradient(90deg,#7c3aed,#5a1ad6);
+      color: #fff;
+      border: none;
+      box-shadow: 0 10px 28px rgba(124,58,237,0.12);
+    }
+    .btn.secondary {
+      background: rgba(255,255,255,0.02);
     }
 
-    /* pulse glow for primary */
-    .btn.primary::before{
-      content:"";
-      position:absolute; inset:-6px;
-      border-radius:inherit;
-      background: radial-gradient(closest-side, rgba(155,60,255,0.12), transparent);
-      z-index:0;
-      opacity:0;
-      transition: opacity .28s ease;
-      pointer-events:none;
-    }
-    .btn.primary:hover::before{ opacity:1; transform: scale(1.02); }
+    .btn .icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:16px; opacity:0.95; }
 
-    .btn.icon-left { justify-content:flex-start; }
+    /* ripple */
+    .ripple { position:absolute; border-radius:50%; transform: scale(0); background: rgba(255,255,255,0.12); animation: ripple .6s ease-out forwards; pointer-events:none; }
+    @keyframes ripple { to { transform: scale(3.8); opacity:0; } }
 
-    .btn .icon { width:26px; height:26px; display:inline-flex; align-items:center; justify-content:center; font-size:18px; z-index:1; }
-
-    /* ripple effect for copy */
-    .ripple {
-      position:absolute; border-radius:50%; transform: scale(0);
-      background: rgba(255,255,255,0.12);
-      animation: rippleAnim 600ms ease-out;
-      pointer-events:none;
-    }
-    @keyframes rippleAnim {
-      to { transform: scale(4); opacity:0; }
-    }
-
-    .toast{
+    /* toast */
+    .toast {
       position:fixed;
       left:50%;
-      transform:translateX(-50%);
       bottom:36px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(20,8,35,0.92));
-      color:white;
+      transform: translate3d(-50%, 12px, 0);
+      background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04));
+      color: #fff;
       padding:10px 18px;
       border-radius:999px;
-      box-shadow: 0 8px 30px rgba(20,6,45,0.6);
+      box-shadow: 0 10px 36px rgba(8,6,24,0.6);
       font-weight:700;
       display:flex;
       gap:10px;
       align-items:center;
-      z-index:9999;
       opacity:0;
-      transform-origin:center;
-      transition: all 280ms cubic-bezier(.2,.9,.1,1);
       pointer-events:none;
+      transition: transform .25s cubic-bezier(.2,.9,.1,1), opacity .25s ease;
     }
-    .toast.show { opacity:1; transform: translateX(-50%) translateY(0); pointer-events:auto; }
+    .toast.show { transform: translate3d(-50%, 0, 0); opacity:1; pointer-events:auto; }
 
-    /* confetti canvas overlay (covers whole window) */
-    #confettiCanvas { position:fixed; inset:0; pointer-events:none; z-index:9998; }
+    /* footer small */
+    .meta { margin-top:12px; color:#cdbff0; font-size:13px; opacity:0.95; }
 
-    .foot {
-      margin-top:12px;
-      color:#cdbff0;
-      font-size:13px;
-      opacity:0.95;
-    }
-
-    @media (max-width:880px){
-      .card{ grid-template-columns: 1fr; }
+    /* accessibility and reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .bg-blur, .card, .ripple, .btn, .toast { animation: none !important; transition: none !important; }
     }
 
+    /* Responsive refinements */
+    @media (max-width:520px){
+      h1{ font-size:28px; gap:8px; }
+      .script, .happy{ font-size:1em; }
+    }
   </style>
 </head>
+
 <body>
+  <div class="wrap" role="main" aria-labelledby="pageTitle">
+    <div class="bg-blur" aria-hidden="true"></div>
 
-  <div class="wrap" role="main" aria-labelledby="title">
-    <!-- decorative blobs -->
-    <div class="blobs" aria-hidden="true" id="blobs">
-      <div class="blob b1"></div>
-      <div class="blob b2"></div>
-      <div class="blob b3"></div>
-    </div>
-
-    <div class="card" id="card" aria-live="polite">
+    <div class="card" role="region" aria-label="HAPPY script card">
       <div>
-        <span class="brand">HAPPY · script</span>
+        <span class="brand" aria-hidden="true">HAPPY · script</span>
 
-        <!-- Updated title: HAPPY (pink glossy) + script (purple-teal glossy) -->
-        <h1 id="title" aria-label="HAPPY script">
-          <span class="title-part title-decor">
-            <span class="happy">HAPPY</span>
-            <!-- little decorative icon -->
-            <svg class="small-ico ico-1" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 2L13.4 8.6L20 9.6L14.5 13.8L16.2 20L12 16.8L7.8 20L9.5 13.8L4 9.6L10.6 8.6L12 2Z" fill="white" opacity="0.06"/>
-            </svg>
-          </span>
-
-          <span class="title-part">
-            <span class="script">script</span>
-            <div class="shimmer" aria-hidden="true"></div>
-            <svg class="small-ico ico-2" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" fill="white" opacity="0.03"></circle>
-            </svg>
-          </span>
+        <!-- Title: HAPPY (pink) + script (purple-teal) -->
+        <h1 id="pageTitle">
+          <span class="happy">HAPPY</span>
+          <span class="script">script</span>
         </h1>
 
-        <div class="foot" aria-hidden="true">Please don't try to read the script anymore 😥</div>
+        <div class="title-shim" aria-hidden="true"></div>
+        <p class="lead">Protected content — copying is allowed for authorized users only. Use the buttons to copy or join the community.</p>
+
+        <div class="meta" aria-hidden="true">Please don't attempt to modify or redistribute without permission.</div>
       </div>
 
       <div class="controls" role="region" aria-label="Actions">
-        <button id="discordBtn" class="btn primary" aria-label="Open Discord" title="Open Discord (new tab)">
+        <button id="discordBtn" class="btn primary" type="button" title="Open Discord (new tab)" aria-label="Open Discord">
           <span class="icon" aria-hidden="true"><i class="fab fa-discord"></i></span>
           <span>Join Discord</span>
         </button>
 
-        <button id="copyBtn" class="btn icon-left" aria-label="Copy script" title="Copy script to clipboard">
+        <button id="copyBtn" class="btn secondary" type="button" title="Copy script to clipboard" aria-label="Copy script to clipboard">
           <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
           <span>Copy script</span>
         </button>
@@ -362,188 +253,104 @@
     </div>
   </div>
 
-  <div class="toast" id="toast" role="status" aria-live="polite">
-    <span id="toastIcon"><i class="fa-solid fa-check"></i></span>
+  <!-- toast (live region for screen readers) -->
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
     <span id="toastText">Copied</span>
   </div>
 
-  <!-- Confetti canvas -->
-  <canvas id="confettiCanvas" width="800" height="600" aria-hidden="true"></canvas>
-
-  <!-- Hidden: place your script here. Keep type="text/plain" so it does not execute. -->
+  <!-- Hidden script content (text/plain so browsers won't execute) -->
   <script id="scriptContent" type="text/plain">
 loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
   </script>
 
   <script>
-  (function(){
-    // CONFIG: change to your Discord invite if desired
-    const DISCORD_URL = "https://discord.gg/Y5r4f4BYtm";
+    (function () {
+      const DISCORD_URL = "https://discord.gg/Y5r4f4BYtm";
+      const discordBtn = document.getElementById('discordBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      const toastEl = document.getElementById('toast');
+      const toastText = document.getElementById('toastText');
+      const scriptTag = document.getElementById('scriptContent');
 
-    // Elements
-    const discordBtn = document.getElementById("discordBtn");
-    const copyBtn = document.getElementById("copyBtn");
-    const toast = document.getElementById("toast");
-    const toastText = document.getElementById("toastText");
-    const scriptTag = document.getElementById("scriptContent");
-    const blobs = document.getElementById("blobs");
-    const confettiCanvas = document.getElementById("confettiCanvas");
-    const ctx = confettiCanvas.getContext('2d');
+      // Open discord safely
+      discordBtn.addEventListener('click', () => {
+        try { window.open(DISCORD_URL, '_blank', 'noopener,noreferrer'); }
+        catch(e){ showToast('Could not open link', false); }
+      });
 
-    // Responsive canvas size
-    function fitCanvas(){
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-    }
-    fitCanvas();
-    window.addEventListener('resize', fitCanvas);
-
-    // Open Discord safely
-    discordBtn.addEventListener("click", () => {
-      window.open(DISCORD_URL, "_blank", "noopener,noreferrer");
-    });
-
-    // Copy script logic
-    async function copyScript(){
-      const txt = scriptTag.textContent.trim();
-      if(!txt){ showToast("No script available", false); return; }
-      try {
-        if(navigator.clipboard && navigator.clipboard.writeText){
-          await navigator.clipboard.writeText(txt);
-        } else {
-          const ta = document.createElement("textarea");
-          ta.value = txt;
-          ta.style.position = "fixed";
-          ta.style.left = "-9999px";
-          document.body.appendChild(ta);
-          ta.select();
-          document.execCommand("copy");
-          document.body.removeChild(ta);
-        }
-        showToast("Copied", true);
-        launchConfetti();
-      } catch(err){
-        showToast("Copy failed", false);
+      // Show toast helper
+      let toastTimer = null;
+      function showToast(message = 'Copied', ok = true) {
+        toastText.textContent = message;
+        toastEl.style.background = ok ? "linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04))" : "linear-gradient(90deg, rgba(255,80,80,0.10), rgba(20,8,35,0.92))";
+        toastEl.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
       }
-    }
-    copyBtn.addEventListener("click", (ev) => {
-      // ripple effect
-      const r = document.createElement('span');
-      r.className = 'ripple';
-      const rect = ev.currentTarget.getBoundingClientRect();
-      const size = Math.max(rect.width, rect.height);
-      r.style.width = r.style.height = size + 'px';
-      r.style.left = (ev.clientX - rect.left - size/2) + 'px';
-      r.style.top = (ev.clientY - rect.top - size/2) + 'px';
-      ev.currentTarget.appendChild(r);
-      setTimeout(()=> r.remove(), 650);
-      copyScript();
-    });
 
-    // Toast helper
-    let tTimer = null;
-    function showToast(msg, success=true){
-      toastText.textContent = msg;
-      toast.classList.add('show');
-      if(success){
-        toast.style.background = "linear-gradient(90deg, rgba(124,58,237,0.14), rgba(94,234,212,0.06))";
-        document.getElementById('toastIcon').innerHTML = '<i class="fa-solid fa-check"></i>';
-      } else {
-        toast.style.background = "linear-gradient(90deg, rgba(255,80,80,0.10), rgba(20,8,35,0.92))";
-        document.getElementById('toastIcon').innerHTML = '<i class="fa-solid fa-xmark"></i>';
-      }
-      clearTimeout(tTimer);
-      tTimer = setTimeout(()=> { toast.classList.remove('show'); }, 2400);
-    }
-
-    // Shortcut: Ctrl/Cmd + Shift + C to copy
-    window.addEventListener("keydown", (e) => {
-      if((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c'){
-        const sel = window.getSelection();
-        if(sel && sel.toString().trim()) return;
-        e.preventDefault();
-        copyScript();
-      }
-    });
-
-    // Parallax blobs following mouse slightly
-    window.addEventListener('mousemove', (e) => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const nx = (e.clientX / w) - 0.5;
-      const ny = (e.clientY / h) - 0.5;
-      // gentle translate
-      const max = 20;
-      blobs.style.transform = `translate3d(${ -nx * max }px, ${ -ny * max }px, 0)`;
-    });
-
-    // CONFETTI: lightweight canvas confetti implementation
-    let confettiPieces = [];
-    function rand(min, max){ return Math.random() * (max - min) + min; }
-    function createPiece(x, y){
-      return {
-        x: x,
-        y: y,
-        vx: rand(-6,6),
-        vy: rand(-12, -6),
-        r: rand(6,12),
-        rot: rand(0,360),
-        vr: rand(-8,8),
-        color: ['#ff66b2','#ffb3e6','#7c3aed','#5eead4','#ffd166'][Math.floor(rand(0,5))],
-        life: 0,
-        ttl: rand(60,100)
-      };
-    }
-
-    function launchConfetti(){
-      const count = 80;
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      for(let i=0;i<count;i++){
-        confettiPieces.push(createPiece(cx + rand(-80,80), cy + rand(-40,40)));
-      }
-      if(!confettiRunning) startConfettiLoop();
-    }
-
-    let confettiRunning = false;
-    function startConfettiLoop(){
-      confettiRunning = true;
-      (function loop(){
-        ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
-        for(let i = confettiPieces.length -1; i>=0; i--){
-          const p = confettiPieces[i];
-          p.vy += 0.4; // gravity
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rot += p.vr;
-          p.life++;
-          // draw
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          ctx.rotate(p.rot * Math.PI/180);
-          ctx.fillStyle = p.color;
-          ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r*0.6);
-          ctx.restore();
-
-          if(p.life > p.ttl || p.y > confettiCanvas.height + 50){
-            confettiPieces.splice(i,1);
+      // Copy logic with fallback
+      async function copyScript() {
+        const txt = scriptTag && scriptTag.textContent ? scriptTag.textContent.trim() : '';
+        if (!txt) { showToast('No script available', false); return; }
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(txt);
+          } else {
+            const ta = document.createElement('textarea');
+            ta.value = txt;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
           }
+          showToast('Copied to clipboard', true);
+        } catch (err) {
+          showToast('Copy failed', false);
         }
-        if(confettiPieces.length > 0){
-          requestAnimationFrame(loop);
-        } else {
-          confettiRunning = false;
-          ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
+      }
+
+      // Ripple visual for button (non-invasive)
+      function rippleEffect(ev) {
+        const btn = ev.currentTarget;
+        const rect = btn.getBoundingClientRect();
+        const r = document.createElement('span');
+        r.className = 'ripple';
+        const size = Math.max(rect.width, rect.height) * 1.2;
+        r.style.width = r.style.height = size + 'px';
+        r.style.left = (ev.clientX - rect.left - size / 2) + 'px';
+        r.style.top = (ev.clientY - rect.top - size / 2) + 'px';
+        btn.appendChild(r);
+        setTimeout(() => r.remove(), 700);
+      }
+
+      // Bind copy button
+      copyBtn.addEventListener('click', (ev) => {
+        // ripple
+        try { rippleEffect(ev); } catch(e) { /* ignore */ }
+        copyScript();
+      });
+
+      // Keyboard shortcut: Ctrl/Cmd + Shift + C
+      window.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
+          const sel = window.getSelection();
+          if (sel && sel.toString().trim()) return;
+          e.preventDefault();
+          copyScript();
         }
-      })();
-    }
+      });
 
-    // Accessibility: announce initial title change (screen readers)
-    const titleEl = document.getElementById('title');
-    titleEl.setAttribute('role','heading');
+      // Accessibility: ensure heading role (announce)
+      const title = document.getElementById('pageTitle');
+      if (title) title.setAttribute('role', 'heading');
 
-  })();
+      // Respect reduced motion: stop background animation if user prefers reduced motion
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        document.querySelectorAll('.bg-blur').forEach(n => n.style.animation = 'none');
+      }
+    })();
   </script>
-
 </body>
 </html>
