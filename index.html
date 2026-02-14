@@ -14,13 +14,9 @@
     :root{
       --bg-a: #040006;
       --bg-b: #0f0714;
-      --glass: rgba(255,255,255,0.03);
       --muted: #cfc6dd;
-      --accent-1: #ff66b2;       /* pink for HAPPY */
-      --accent-2: linear-gradient(90deg,#7c3aed,#5eead4); /* purple-teal for script */
       --card-border: rgba(155,60,255,0.10);
       --radius: 14px;
-      --glass-strong: rgba(255,255,255,0.04);
       --focus: 3px;
     }
 
@@ -108,26 +104,87 @@
       position:relative;
     }
 
-    /* HAPPY (pink glossy) */
+    /* -------------------------
+       Animated color for HAPPY
+       ------------------------- */
     .happy {
       font-weight:900;
       font-size:1.05em;
-      background: linear-gradient(90deg, var(--accent-1), #ff3fa0 70%);
+      /* multi-stop pink gradient that moves */
+      background: linear-gradient(90deg, #ff66b2 0%, #ff3fa0 35%, #ff88c6 70%, #ff66b2 100%);
+      background-size: 300% 300%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 6px 16px rgba(255,102,178,0.12));
       position:relative;
+      animation: pinkShift 6s ease infinite;
     }
 
-    /* script (purple-teal glossy) */
+    @keyframes pinkShift {
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    /* subtle glossy shimmer overlay on HAPPY */
+    .happy::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0.0) 40%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.12) 100%);
+      mix-blend-mode: overlay;
+      opacity: 0.6;
+      transform: translateX(-120%);
+      animation: shimmerMove 2.8s linear infinite;
+    }
+
+    /* -------------------------
+       Animated color for script
+       ------------------------- */
     .script {
       font-weight:800;
       font-size:1.05em;
-      background: var(--accent-2);
+      /* purple -> teal gradient that moves differently */
+      background: linear-gradient(90deg, #7c3aed 0%, #5eead4 40%, #7c3aed 100%);
+      background-size: 240% 240%;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       filter: drop-shadow(0 8px 22px rgba(124,58,237,0.12));
       position:relative;
+      animation: tealVioletShift 7.2s ease infinite;
+    }
+
+    @keyframes tealVioletShift {
+      0%{ background-position: 0% 50%; }
+      50%{ background-position: 100% 50%; }
+      100%{ background-position: 0% 50%; }
+    }
+
+    /* tiny shimmer overlay for script, slower and subtler */
+    .script::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 6px;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.0) 50%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.10) 100%);
+      mix-blend-mode: overlay;
+      opacity: 0.5;
+      transform: translateX(-120%);
+      animation: shimmerMoveSlow 4.2s linear infinite;
+    }
+
+    @keyframes shimmerMove {
+      0% { transform: translateX(-120%); opacity: 0.3; }
+      50% { transform: translateX(20%); opacity: 0.9; }
+      100% { transform: translateX(120%); opacity: 0.3; }
+    }
+    @keyframes shimmerMoveSlow {
+      0% { transform: translateX(-120%); opacity: 0.25; }
+      50% { transform: translateX(10%); opacity: 0.85; }
+      100% { transform: translateX(120%); opacity: 0.25; }
     }
 
     /* small shimmer line under title (subtle) */
@@ -208,7 +265,8 @@
 
     /* accessibility and reduced motion */
     @media (prefers-reduced-motion: reduce){
-      .bg-blur, .card, .ripple, .btn, .toast { animation: none !important; transition: none !important; }
+      .bg-blur, .card, .ripple, .btn, .toast, .happy, .script { animation: none !important; transition: none !important; }
+      .happy::after, .script::after { display:none !important; }
     }
 
     /* Responsive refinements */
@@ -227,14 +285,14 @@
       <div>
         <span class="brand" aria-hidden="true">HAPPY · script</span>
 
-        <!-- Title: HAPPY (pink) + script (purple-teal) -->
+        <!-- Title: HAPPY (pink animated) + script (purple-teal animated) -->
         <h1 id="pageTitle">
           <span class="happy">HAPPY</span>
           <span class="script">script</span>
         </h1>
 
         <div class="title-shim" aria-hidden="true"></div>
-        <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or you can report any issues you encounter while using HAPPY scripts.</p>
+        <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or report any issues you encounter while using HAPPY scripts.</p>
 
         <div class="meta" aria-hidden="true">Please don't try to read the raw script 😭.</div>
       </div>
@@ -348,7 +406,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
 
       // Respect reduced motion: stop background animation if user prefers reduced motion
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.bg-blur').forEach(n => n.style.animation = 'none');
+        document.querySelectorAll('.bg-blur, .happy, .script').forEach(n => n.style.animation = 'none');
       }
     })();
   </script>
