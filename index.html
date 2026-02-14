@@ -18,262 +18,152 @@
       --card-border: rgba(155,60,255,0.10);
       --radius: 14px;
       --focus: 3px;
+
+      /* animation settings */
+      --anim-speed-happy: 6s;
+      --anim-speed-script: 8.5s;
     }
 
-    /* Reset & base */
     *{box-sizing:border-box}
     html,body{height:100%; margin:0; font-family:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,var(--bg-a),var(--bg-b)); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-    /* Layout */
-    .wrap{
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:28px;
-      position:relative;
-      overflow:hidden;
-    }
+    .wrap{ min-height:100vh; display:flex; align-items:center; justify-content:center; padding:28px; position:relative; overflow:hidden; }
 
-    /* subtle background blobs (performant: only CSS gradients + slow animation) */
     .bg-blur {
-      position: absolute;
-      inset: -20%;
-      z-index:0;
-      pointer-events:none;
+      position:absolute; inset:-20%; z-index:0; pointer-events:none;
       background:
         radial-gradient(400px 300px at 10% 20%, rgba(255,102,178,0.12), transparent 20%),
         radial-gradient(360px 260px at 85% 70%, rgba(124,58,237,0.10), transparent 18%),
         radial-gradient(520px 420px at 20% 85%, rgba(94,234,212,0.06), transparent 25%);
       filter: blur(48px) saturate(1.05);
-      transform: translateZ(0);
       animation: bgDrift 28s linear infinite;
       opacity:0.9;
+      transform: translateZ(0);
     }
-    @keyframes bgDrift {
-      0%{ transform: translateX(0) translateY(0) }
-      50%{ transform: translateX(12px) translateY(-8px) }
-      100%{ transform: translateX(0) translateY(0) }
-    }
+    @keyframes bgDrift { 0%{ transform: translateX(0) translateY(0) } 50%{ transform: translateX(12px) translateY(-8px) } 100%{ transform: translateX(0) translateY(0) } }
 
-    /* Card */
     .card {
-      z-index:2;
-      width:min(920px,96%);
-      border-radius:var(--radius);
-      padding:34px;
-      display:grid;
-      grid-template-columns: 1fr 320px;
-      gap:22px;
+      z-index:2; width:min(920px,96%); border-radius:var(--radius); padding:34px;
+      display:grid; grid-template-columns:1fr 320px; gap:22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-      border: 1px solid var(--card-border);
-      box-shadow: 0 18px 48px rgba(6,6,12,0.6);
-      backdrop-filter: blur(10px) saturate(1.06);
-      align-items:start;
-      transition: transform .32s ease, box-shadow .32s ease;
+      border: 1px solid var(--card-border); box-shadow: 0 18px 48px rgba(6,6,12,0.6);
+      backdrop-filter: blur(10px) saturate(1.06); align-items:start; transition: transform .32s ease, box-shadow .32s ease;
     }
-    .card:focus-within { box-shadow: 0 28px 68px rgba(6,6,12,0.7); transform: translateY(-4px); }
+    @media (max-width:900px){ .card{ grid-template-columns: 1fr; padding:20px; gap:16px; } }
 
-    @media (max-width:900px){
-      .card{ grid-template-columns: 1fr; padding:20px; gap:16px; }
-    }
+    .brand { display:inline-block; font-family:"JetBrains Mono", monospace; font-weight:700; color:#caa9ff; letter-spacing:.6px; font-size:11px; padding:6px 10px; border-radius:9px; background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03)); }
 
-    /* Brand */
-    .brand {
-      display:inline-block;
-      font-family: "JetBrains Mono", monospace;
-      font-weight:700;
-      color: #caa9ff;
-      letter-spacing:0.6px;
-      font-size:11px;
-      padding:6px 10px;
-      border-radius:9px;
-      background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03));
-    }
-
-    /* Title */
-    h1 {
-      margin:14px 0 6px;
-      font-size:36px;
-      color: #fff;
-      line-height:1.03;
-      font-weight:800;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      position:relative;
-    }
+    h1 { margin:14px 0 6px; font-size:36px; color:#fff; line-height:1.03; font-weight:800; display:flex; gap:12px; align-items:center; position:relative; }
 
     /* -------------------------
-       Animated color for HAPPY
+       DYNAMIC COLOR EFFECTS
+       - animated gradient move
+       - subtle glow pulse
+       - glossy overlay pseudo-element
+       - staggered durations for variety
        ------------------------- */
-    .happy {
+
+    /* base styles for animated text */
+    .animated-text {
+      display:inline-block;
+      position:relative;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 300% 100%;
+      will-change: background-position, filter;
+    }
+
+    /* HAPPY: pink candy gradient moving left->right */
+    .happy.animated-text {
+      background-image: linear-gradient(90deg, #ff66b2 0%, #ff3fa0 30%, #ffd0ea 60%, #ff66b2 100%);
+      animation: moveGradient var(--anim-speed-happy) linear infinite, glowPulse 3.6s ease-in-out infinite;
+      filter: drop-shadow(0 6px 18px rgba(255,102,178,0.14));
       font-weight:900;
       font-size:1.05em;
-      /* multi-stop pink gradient that moves */
-      background: linear-gradient(90deg, #ff66b2 0%, #ff3fa0 35%, #ff88c6 70%, #ff66b2 100%);
-      background-size: 300% 300%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 6px 16px rgba(255,102,178,0.12));
-      position:relative;
-      animation: pinkShift 6s ease infinite;
     }
 
-    @keyframes pinkShift {
-      0%{ background-position: 0% 50%; }
-      50%{ background-position: 100% 50%; }
-      100%{ background-position: 0% 50%; }
-    }
-
-    /* subtle glossy shimmer overlay on HAPPY */
-    .happy::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      pointer-events: none;
-      background: linear-gradient(90deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.02) 20%, rgba(255,255,255,0.0) 40%, rgba(255,255,255,0.02) 60%, rgba(255,255,255,0.12) 100%);
-      mix-blend-mode: overlay;
-      opacity: 0.6;
-      transform: translateX(-120%);
-      animation: shimmerMove 2.8s linear infinite;
-    }
-
-    /* -------------------------
-       Animated color for script
-       ------------------------- */
-    .script {
+    /* script: purple -> teal subtle movement opposite direction */
+    .script.animated-text {
+      background-image: linear-gradient(90deg, #7c3aed 0%, #5eead4 40%, #b89bff 75%, #7c3aed 100%);
+      animation: moveGradientReverse var(--anim-speed-script) linear infinite, glowPulse 4.6s ease-in-out infinite;
+      filter: drop-shadow(0 8px 22px rgba(124,58,237,0.12));
       font-weight:800;
       font-size:1.05em;
-      /* purple -> teal gradient that moves differently */
-      background: linear-gradient(90deg, #7c3aed 0%, #5eead4 40%, #7c3aed 100%);
-      background-size: 240% 240%;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 8px 22px rgba(124,58,237,0.12));
-      position:relative;
-      animation: tealVioletShift 7.2s ease infinite;
     }
 
-    @keyframes tealVioletShift {
-      0%{ background-position: 0% 50%; }
-      50%{ background-position: 100% 50%; }
-      100%{ background-position: 0% 50%; }
+    /* gradient motion keyframes */
+    @keyframes moveGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes moveGradientReverse {
+      0% { background-position: 100% 50%; }
+      50% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
     }
 
-    /* tiny shimmer overlay for script, slower and subtler */
-    .script::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      border-radius: 6px;
-      pointer-events: none;
-      background: linear-gradient(90deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.01) 25%, rgba(255,255,255,0.0) 50%, rgba(255,255,255,0.01) 75%, rgba(255,255,255,0.10) 100%);
+    /* subtle glow pulse (changes drop-shadow via filter) */
+    @keyframes glowPulse {
+      0% { filter: drop-shadow(0 6px 12px rgba(0,0,0,0)); }
+      40% { filter: drop-shadow(0 10px 28px rgba(124,58,237,0.08)); }
+      100% { filter: drop-shadow(0 6px 12px rgba(0,0,0,0)); }
+    }
+
+    /* glossy overlay using pseudo-element for both parts */
+    .animated-text::after {
+      content:"";
+      position:absolute;
+      left:-10%;
+      top:-30%;
+      width:120%;
+      height:160%;
+      pointer-events:none;
+      background: linear-gradient(180deg, rgba(255,255,255,0.18), rgba(255,255,255,0.02));
       mix-blend-mode: overlay;
-      opacity: 0.5;
-      transform: translateX(-120%);
-      animation: shimmerMoveSlow 4.2s linear infinite;
+      opacity:0.22;
+      transform: rotate(-18deg) translateY(-6px);
+      transition: opacity .3s ease;
+      animation: glossMove calc(var(--anim-speed-happy) * 2) linear infinite;
+    }
+    /* different cadence for script gloss so it doesn't sync exactly */
+    .script.animated-text::after { animation-duration: calc(var(--anim-speed-script) * 2.2); opacity:0.26; }
+
+    @keyframes glossMove {
+      0% { transform: translateX(-40%) rotate(-18deg) translateY(-6px); opacity:0.18; }
+      50% { transform: translateX(40%) rotate(-18deg) translateY(-6px); opacity:0.28; }
+      100% { transform: translateX(-40%) rotate(-18deg) translateY(-6px); opacity:0.18; }
     }
 
-    @keyframes shimmerMove {
-      0% { transform: translateX(-120%); opacity: 0.3; }
-      50% { transform: translateX(20%); opacity: 0.9; }
-      100% { transform: translateX(120%); opacity: 0.3; }
-    }
-    @keyframes shimmerMoveSlow {
-      0% { transform: translateX(-120%); opacity: 0.25; }
-      50% { transform: translateX(10%); opacity: 0.85; }
-      100% { transform: translateX(120%); opacity: 0.25; }
+    /* pause animations on hover for micro-control */
+    .animated-text:hover { animation-play-state: paused; }
+    .animated-text:hover::after { animation-play-state: paused; }
+
+    /* accessibility: respect reduced motion preference */
+    @media (prefers-reduced-motion: reduce) {
+      .happy.animated-text,
+      .script.animated-text,
+      .animated-text::after,
+      .animated-text { animation: none !important; transition: none !important; }
+      .bg-blur { animation: none !important; }
     }
 
-    /* small shimmer line under title (subtle) */
-    .title-shim {
-      height:6px;
-      border-radius:6px;
-      background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01));
-      width:60%;
-      margin-top:10px;
-      opacity:0.45;
-    }
-
-    /* subtitle */
+    /* rest (controls, toast, etc) kept minimal / unchanged */
+    .title-shim { height:6px; border-radius:6px; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)); width:60%; margin-top:10px; opacity:0.45; }
     .lead { margin-top:6px; color:#d9cff0; opacity:0.9; font-size:14px; }
-
-    /* Controls */
     .controls{ display:flex; flex-direction:column; gap:12px; align-items:stretch; justify-content:flex-start; }
-    .btn {
-      position:relative;
-      overflow:hidden;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      justify-content:center;
-      padding:12px 14px;
-      border-radius:10px;
-      cursor:pointer;
-      user-select:none;
-      border:1px solid rgba(255,255,255,0.04);
-      font-weight:700;
-      font-size:15px;
-      transition: transform .12s ease, box-shadow .12s ease, background .18s ease;
-      background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.04));
-      color:var(--muted);
-    }
-    .btn:active { transform: translateY(1px); }
-    .btn:focus { outline: none; box-shadow: 0 0 0 var(--focus) rgba(124,58,237,0.14); }
-
-    .btn.primary {
-      background: linear-gradient(90deg,#7c3aed,#5a1ad6);
-      color: #fff;
-      border: none;
-      box-shadow: 0 10px 28px rgba(124,58,237,0.12);
-    }
-    .btn.secondary {
-      background: rgba(255,255,255,0.02);
-    }
-
+    .btn { position:relative; overflow:hidden; display:flex; gap:12px; align-items:center; justify-content:center; padding:12px 14px; border-radius:10px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,0.04); font-weight:700; font-size:15px; transition: transform .12s ease, box-shadow .12s ease, background .18s ease; background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.04)); color:var(--muted); }
+    .btn:active { transform: translateY(1px); } .btn:focus { outline: none; box-shadow: 0 0 0 var(--focus) rgba(124,58,237,0.14); }
+    .btn.primary { background: linear-gradient(90deg,#7c3aed,#5a1ad6); color:#fff; border:none; box-shadow: 0 10px 28px rgba(124,58,237,0.12); }
+    .btn.secondary { background: rgba(255,255,255,0.02); }
     .btn .icon { width:28px; height:28px; display:inline-flex; align-items:center; justify-content:center; font-size:16px; opacity:0.95; }
-
-    /* ripple */
     .ripple { position:absolute; border-radius:50%; transform: scale(0); background: rgba(255,255,255,0.12); animation: ripple .6s ease-out forwards; pointer-events:none; }
     @keyframes ripple { to { transform: scale(3.8); opacity:0; } }
-
-    /* toast */
-    .toast {
-      position:fixed;
-      left:50%;
-      bottom:36px;
-      transform: translate3d(-50%, 12px, 0);
-      background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04));
-      color: #fff;
-      padding:10px 18px;
-      border-radius:999px;
-      box-shadow: 0 10px 36px rgba(8,6,24,0.6);
-      font-weight:700;
-      display:flex;
-      gap:10px;
-      align-items:center;
-      opacity:0;
-      pointer-events:none;
-      transition: transform .25s cubic-bezier(.2,.9,.1,1), opacity .25s ease;
-    }
+    .toast { position:fixed; left:50%; bottom:36px; transform: translate3d(-50%, 12px, 0); background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04)); color:#fff; padding:10px 18px; border-radius:999px; box-shadow: 0 10px 36px rgba(8,6,24,0.6); font-weight:700; display:flex; gap:10px; align-items:center; opacity:0; pointer-events:none; transition: transform .25s cubic-bezier(.2,.9,.1,1), opacity .25s ease; }
     .toast.show { transform: translate3d(-50%, 0, 0); opacity:1; pointer-events:auto; }
-
-    /* footer small */
     .meta { margin-top:12px; color:#cdbff0; font-size:13px; opacity:0.95; }
 
-    /* accessibility and reduced motion */
-    @media (prefers-reduced-motion: reduce){
-      .bg-blur, .card, .ripple, .btn, .toast, .happy, .script { animation: none !important; transition: none !important; }
-      .happy::after, .script::after { display:none !important; }
-    }
-
-    /* Responsive refinements */
-    @media (max-width:520px){
-      h1{ font-size:28px; gap:8px; }
-      .script, .happy{ font-size:1em; }
-    }
+    @media (max-width:520px){ h1{ font-size:28px; gap:8px; } .script, .happy{ font-size:1em; } }
   </style>
 </head>
 
@@ -285,14 +175,14 @@
       <div>
         <span class="brand" aria-hidden="true">HAPPY · script</span>
 
-        <!-- Title: HAPPY (pink animated) + script (purple-teal animated) -->
-        <h1 id="pageTitle">
-          <span class="happy">HAPPY</span>
-          <span class="script">script</span>
+        <!-- Title: use the animated-text class to enable dynamic colors -->
+        <h1 id="pageTitle" aria-label="HAPPY script">
+          <span class="happy animated-text">HAPPY</span>
+          <span class="script animated-text">script</span>
         </h1>
 
         <div class="title-shim" aria-hidden="true"></div>
-        <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or report any issues you encounter while using HAPPY scripts.</p>
+        <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or report issues you encounter.</p>
 
         <div class="meta" aria-hidden="true">Please don't try to read the raw script 😭.</div>
       </div>
@@ -330,13 +220,11 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       const toastText = document.getElementById('toastText');
       const scriptTag = document.getElementById('scriptContent');
 
-      // Open discord safely
       discordBtn.addEventListener('click', () => {
         try { window.open(DISCORD_URL, '_blank', 'noopener,noreferrer'); }
         catch(e){ showToast('Could not open link', false); }
       });
 
-      // Show toast helper
       let toastTimer = null;
       function showToast(message = 'Copied', ok = true) {
         toastText.textContent = message;
@@ -346,7 +234,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
       }
 
-      // Copy logic with fallback
       async function copyScript() {
         const txt = scriptTag && scriptTag.textContent ? scriptTag.textContent.trim() : '';
         if (!txt) { showToast('No script available', false); return; }
@@ -369,7 +256,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       }
 
-      // Ripple visual for button (non-invasive)
       function rippleEffect(ev) {
         const btn = ev.currentTarget;
         const rect = btn.getBoundingClientRect();
@@ -383,14 +269,11 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         setTimeout(() => r.remove(), 700);
       }
 
-      // Bind copy button
       copyBtn.addEventListener('click', (ev) => {
-        // ripple
-        try { rippleEffect(ev); } catch(e) { /* ignore */ }
+        try { rippleEffect(ev); } catch(e) {}
         copyScript();
       });
 
-      // Keyboard shortcut: Ctrl/Cmd + Shift + C
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
           const sel = window.getSelection();
@@ -400,13 +283,11 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // Accessibility: ensure heading role (announce)
       const title = document.getElementById('pageTitle');
       if (title) title.setAttribute('role', 'heading');
 
-      // Respect reduced motion: stop background animation if user prefers reduced motion
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.bg-blur, .happy, .script').forEach(n => n.style.animation = 'none');
+        document.querySelectorAll('.bg-blur').forEach(n => n.style.animation = 'none');
       }
     })();
   </script>
