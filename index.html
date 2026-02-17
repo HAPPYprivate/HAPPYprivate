@@ -58,6 +58,53 @@
       100%{ transform: translateX(0) translateY(0) }
     }
 
+    /* Intro logo animation */
+    .intro-logo {
+      position:absolute;
+      z-index:3;
+      top:50%;
+      left:50%;
+      width:min(140px, 36vw);
+      height:auto;
+      opacity:0;
+      transform: translate(-50%, -50%) scale(0.86);
+      filter: drop-shadow(0 12px 34px rgba(0,0,0,0.55));
+      pointer-events:none;
+      will-change: transform, opacity;
+    }
+
+    body.intro-playing .intro-logo {
+      animation: introLogoMove 1.6s cubic-bezier(.2,.9,.25,1) forwards;
+    }
+
+    @keyframes introLogoMove {
+      0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.86); }
+      35%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      60%  { opacity: 1; transform: translate(-50%, -53%) scale(1.03); }
+      74%  { opacity: 1; transform: translate(-50%, -58%) scale(0.98); }
+      100% { opacity: 0.95; transform: translate(-50%, -215%) scale(0.72); }
+    }
+
+    body.intro-playing .card {
+      opacity:0;
+      transform: translateY(20px) scale(0.985);
+      pointer-events:none;
+    }
+
+    body.intro-reveal .card {
+      animation: revealCard .72s cubic-bezier(.2,.9,.2,1) forwards;
+    }
+
+    @keyframes revealCard {
+      0% { opacity:0; transform: translateY(20px) scale(0.985); }
+      100% { opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    body.intro-done .intro-logo {
+      opacity:0;
+      transition: opacity .3s ease;
+    }
+
     /* Card */
     .card {
       z-index:2;
@@ -78,6 +125,13 @@
 
     @media (max-width:900px){
       .card{ grid-template-columns: 1fr; padding:20px; gap:16px; }
+      @keyframes introLogoMove {
+        0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.86); }
+        35%  { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        60%  { opacity: 1; transform: translate(-50%, -53%) scale(1.03); }
+        74%  { opacity: 1; transform: translate(-50%, -58%) scale(0.98); }
+        100% { opacity: 0.95; transform: translate(-50%, -178%) scale(0.72); }
+      }
     }
 
     /* Brand */
@@ -204,6 +258,8 @@
       box-shadow: 0 10px 28px rgba(124,58,237,0.12);
     }
     .btn.secondary {
+/workspace/HAPPYprivate$ /bin/bash -lc sed -n '260,520p' index.html
+.btn.secondary {
       background: rgba(255,255,255,0.02);
     }
 
@@ -241,6 +297,7 @@
     @media (prefers-reduced-motion: reduce){
       .bg-blur, .card, .ripple, .btn, .toast { animation: none !important; transition: none !important; }
       .happy, .script { animation: none !important; background-size: auto !important; }
+      .intro-logo { display:none; }
     }
 
     /* Responsive refinements */
@@ -254,6 +311,7 @@
 <body>
   <div class="wrap" role="main" aria-labelledby="pageTitle">
     <div class="bg-blur" aria-hidden="true"></div>
+    <img src="logo.png" alt="" class="intro-logo" aria-hidden="true" />
 
     <div class="card" role="region" aria-label="HAPPY script card">
       <div>
@@ -381,6 +439,16 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       // Respect reduced motion: stop background animation if user prefers reduced motion
       if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.querySelectorAll('.bg-blur').forEach(n => n.style.animation = 'none');
+      } else {
+        document.body.classList.add('intro-playing');
+        setTimeout(() => {
+          document.body.classList.add('intro-reveal');
+          document.body.classList.remove('intro-playing');
+        }, 1400);
+        setTimeout(() => {
+          document.body.classList.add('intro-done');
+          document.body.classList.remove('intro-reveal');
+        }, 2200);
       }
     })();
   </script>
