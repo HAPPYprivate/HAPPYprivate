@@ -22,11 +22,9 @@
       --reveal-ease: cubic-bezier(.18,.9,.22,1);
     }
 
-    /* Reset & base */
     *{box-sizing:border-box}
     html,body{height:100%; margin:0; font-family:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; background: linear-gradient(180deg,var(--bg-a),var(--bg-b)); color:var(--muted); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
 
-    /* Layout */
     .wrap{
       min-height:100vh;
       display:flex;
@@ -57,14 +55,16 @@
       100%{ transform: translateX(0) translateY(0) }
     }
 
-    /* CARD shell (always present) */
+    /* Card shell uses grid areas so we can place controls left or below via CSS only */
     .card-shell {
       z-index:2;
       width:min(920px,96%);
       border-radius:var(--radius);
       padding:34px;
       display:grid;
-      grid-template-columns: 1fr 320px;
+      grid-template-columns: 320px 1fr;           /* default: controls left, content right */
+      grid-template-rows: auto;
+      grid-template-areas: "controls main";
       gap:22px;
       background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));
       border: 1px solid rgba(255,255,255,0.02);
@@ -80,7 +80,18 @@
       will-change: transform, box-shadow, opacity;
     }
 
-    /* skeleton placeholder sits on top while content is hidden */
+    /* On narrow screens: stack main then controls (controls go below) */
+    @media (max-width:900px){
+      .card-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "main"
+          "controls";
+        padding:20px;
+        gap:16px;
+      }
+    }
+
     .skeleton {
       position:absolute;
       inset:0;
@@ -93,7 +104,6 @@
       pointer-events:none;
       overflow:hidden;
     }
-    /* subtle shimmer on skeleton */
     .skeleton::after {
       content: "";
       position:absolute;
@@ -106,14 +116,11 @@
     }
     @keyframes shimmer { to { transform: translateX(130%); } }
 
-    /* CARD revealed state (the professional entrance) */
     .card-shell.revealed {
       transform: translateY(0) scale(1);
       box-shadow: 0 26px 84px rgba(6,6,12,0.66);
       pointer-events:auto;
     }
-
-    /* hide skeleton when revealed */
     .card-shell.revealed .skeleton {
       opacity:0;
       transform: scale(.997);
@@ -121,22 +128,36 @@
       pointer-events:none;
     }
 
-    /* content wrapper: initially empty (invisible) then revealed with stagger */
+    /* The two visual areas */
+    .controls {
+      grid-area: controls;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      align-items:stretch;
+      justify-content:flex-start;
+      z-index:2;
+    }
+
+    .main {
+      grid-area: main;
+      z-index:2;
+    }
+
+    /* content wrapper + stagger rules */
     .card-content { z-index:2; opacity:0; transform: translateY(8px); transition: opacity .6s ease, transform .6s var(--reveal-ease); }
     .card-shell.revealed .card-content { opacity:1; transform: translateY(0); }
 
-    /* staggered children inside content */
     .card-content > * { opacity:0; transform: translateY(8px); will-change: transform, opacity; }
     .card-shell.revealed .card-content > * {
       opacity:1;
       transform: translateY(0);
       transition: opacity .42s ease, transform .42s var(--reveal-ease);
     }
-
-    /* We'll set per-child delays via CSS variables (JS assigns them) */
+    /* per-element delay variable (set by JS) */
     .card-content > * { transition-delay: var(--d, 0ms); }
 
-    /* Basic inner styles (kept mostly from your original file) */
+    /* inner styles (kept from original) */
     .brand { display:inline-block; font-family:"JetBrains Mono", monospace; font-weight:700; color:#caa9ff; letter-spacing:0.6px; font-size:11px; padding:6px 10px; border-radius:9px; background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03)); }
     h1 { margin:14px 0 6px; font-size:36px; color:#fff; line-height:1.03; font-weight:800; display:flex; gap:12px; align-items:center; }
     .happy { font-weight:900; font-size:1.05em; background: linear-gradient(90deg,#ff66b2 0%,#ff3fa0 25%,#ff9ad1 50%,#ff66b2 75%,#ffb3e6 100%); background-size:300% 100%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: happyColor 6s linear infinite; filter: drop-shadow(0 6px 16px rgba(255,102,178,0.12)); }
@@ -146,27 +167,21 @@
     .title-shim { height:6px; border-radius:6px; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)); width:60%; margin-top:10px; opacity:0.45; }
     .lead { margin-top:6px; color:#d9cff0; opacity:0.9; font-size:14px; }
     .meta { margin-top:12px; color:#cdbff0; font-size:13px; opacity:0.95; }
-    .controls{ display:flex; flex-direction:column; gap:12px; align-items:stretch; justify-content:flex-start; }
+
     .btn { position:relative; overflow:hidden; display:flex; gap:12px; align-items:center; justify-content:center; padding:12px 14px; border-radius:10px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,0.04); font-weight:700; font-size:15px; transition: transform .12s ease, box-shadow .12s ease, background .18s ease; background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.04)); color:var(--muted); }
     .btn.primary { background: linear-gradient(90deg,#7c3aed,#5a1ad6); color:#fff; border:none; box-shadow:0 10px 28px rgba(124,58,237,0.12); }
     .btn.secondary { background: rgba(255,255,255,0.02); }
     .ripple { position:absolute; border-radius:50%; transform: scale(0); background: rgba(255,255,255,0.12); animation: ripple .6s ease-out forwards; pointer-events:none; }
     @keyframes ripple { to { transform: scale(3.8); opacity:0; } }
 
-    /* Toast */
     .toast { position:fixed; left:50%; bottom:36px; transform: translate3d(-50%, 12px, 0); background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04)); color: #fff; padding:10px 18px; border-radius:999px; box-shadow: 0 10px 36px rgba(8,6,24,0.6); font-weight:700; display:flex; gap:10px; align-items:center; opacity:0; pointer-events:none; transition: transform .25s cubic-bezier(.2,.9,.1,1), opacity .25s ease; }
     .toast.show { transform: translate3d(-50%, 0, 0); opacity:1; pointer-events:auto; }
 
-    /* Responsive */
-    @media (max-width:900px){ .card-shell{ grid-template-columns:1fr; padding:20px; gap:16px; } }
-
-    /* Respect reduced motion */
     @media (prefers-reduced-motion: reduce){
       .bg-blur, .card-shell, .skeleton, .card-content > * { animation: none !important; transition: none !important; transform: none !important; opacity:1 !important; }
       .card-shell { pointer-events:auto; box-shadow: 0 18px 48px rgba(6,6,12,0.6); }
       .skeleton { display:none; }
     }
-
   </style>
 </head>
 
@@ -174,12 +189,27 @@
   <div class="wrap" role="main" aria-labelledby="pageTitle">
     <div class="bg-blur" aria-hidden="true"></div>
 
-    <!-- Card shell always present; skeleton shows first, content hidden -->
+    <!-- Card shell: controls placed BEFORE main in DOM so stagger order is controls -> main.
+         CSS grid areas re-position for wide (controls left) and narrow (controls below). -->
     <div id="card" class="card-shell" role="region" aria-label="HAPPY script card">
       <div class="skeleton" aria-hidden="true"></div>
 
       <div class="card-content" aria-hidden="false">
-        <div>
+        <!-- Controls first in DOM (so they animate earlier), but CSS puts them left on wide and below on narrow -->
+        <div class="controls" role="region" aria-label="Actions">
+          <button id="discordBtn" class="btn primary" type="button" title="Open Discord (new tab)" aria-label="Open Discord">
+            <span class="icon" aria-hidden="true"><i class="fab fa-discord"></i></span>
+            <span>Join Discord</span>
+          </button>
+
+          <button id="copyBtn" class="btn secondary" type="button" title="Copy script to clipboard" aria-label="Copy script to clipboard">
+            <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
+            <span>Copy script</span>
+          </button>
+        </div>
+
+        <!-- Main content -->
+        <div class="main" role="region" aria-label="Main content">
           <span class="brand" aria-hidden="true">Dev by HAPPY script</span>
 
           <h1 id="pageTitle">
@@ -191,18 +221,6 @@
           <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or you can report any issues you encounter while using HAPPY scripts.</p>
 
           <div class="meta" aria-hidden="true">Please don't try to read the raw script 😭.</div>
-        </div>
-
-        <div class="controls" role="region" aria-label="Actions">
-          <button id="discordBtn" class="btn primary" type="button" title="Open Discord (new tab)" aria-label="Open Discord">
-            <span class="icon" aria-hidden="true"><i class="fab fa-discord"></i></span>
-            <span>Join Discord</span>
-          </button>
-
-          <button id="copyBtn" class="btn secondary" type="button" title="Copy script to clipboard" aria-label="Copy script to clipboard">
-            <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
-            <span>Copy script</span>
-          </button>
         </div>
       </div>
     </div>
@@ -229,8 +247,9 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       const card = document.getElementById('card');
       const content = card.querySelector('.card-content');
       const controls = card.querySelector('.controls');
+      const main = card.querySelector('.main');
 
-      // Button behaviors (unchanged)
+      // Button behavior
       discordBtn && discordBtn.addEventListener('click', () => {
         try { window.open(DISCORD_URL, '_blank', 'noopener,noreferrer'); } catch(e){ showToast('Could not open link', false); }
       });
@@ -285,7 +304,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         copyScript();
       });
 
-      // Keyboard shortcut
+      // keyboard shortcut
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
           const sel = window.getSelection();
@@ -295,152 +314,69 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // Accessibility
+      // accessibility
       const title = document.getElementById('pageTitle');
       if (title) title.setAttribute('role', 'heading');
 
-      // ---------------------------
-      // Button auto-sort logic
-      // ---------------------------
-      // Sorts controls buttons by measured width (largest first).
-      function measureAndSortButtons() {
-        if (!controls) return;
-        const buttons = Array.from(controls.querySelectorAll('.btn'));
-        if (!buttons.length) return;
-
-        // Measure widths (force layout read)
-        const measurements = buttons.map(btn => {
-          // ensure element is visible for accurate measurement:
-          // temporarily set visibility if needed
-          const prevVisibility = btn.style.visibility;
-          btn.style.visibility = 'hidden'; // keep hidden but measurable
-          // read width
-          const rect = btn.getBoundingClientRect();
-          const w = rect.width || btn.scrollWidth || btn.offsetWidth;
-          btn.style.visibility = prevVisibility;
-          return { btn, w };
-        });
-
-        // stable sort by width descending
-        measurements.sort((a,b) => {
-          if (b.w === a.w) return 0;
-          return b.w - a.w;
-        });
-
-        // re-append in sorted order (this moves DOM nodes without cloning events)
-        measurements.forEach(({btn}) => controls.appendChild(btn));
-      }
-
-      // debounce helper
-      function debounce(fn, wait) {
-        let t;
-        return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
-      }
-
-      // call setStaggerDelays AFTER ordering so delays reflect final DOM order
-      function setStaggerDelays() {
-        // children from left column then controls column
-        const leftCol = content.children[0];
-        const rightCol = content.children[1];
-        let children = [];
-        if (leftCol) children = children.concat(Array.from(leftCol.children));
-        if (rightCol) children = children.concat(Array.from(rightCol.children));
-        if (children.length === 0) {
-          Array.from(content.children).forEach((el, idx) => el.style.setProperty('--d', `${idx*80}ms`));
-          return;
-        }
-        children.forEach((el, idx) => {
-          // start delays a bit later so card entrance feels cohesive
-          el.style.setProperty('--d', `${120 + idx * 80}ms`);
-        });
-      }
-
-      // ---------------------------
-      // Intro & reveal sequence
-      // ---------------------------
+      // Respect reduced motion
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-      function revealImmediately() {
-        // used for reduced-motion users
-        measureAndSortButtons();
-        setStaggerDelays();
+      if (reduce) {
         card.classList.add('revealed');
-        // force children visible
+        // show all immediately
         content.style.opacity = 1;
         content.style.transform = 'translateY(0)';
-        content.querySelectorAll('*').forEach((el) => el.style.opacity = 1);
+        Array.from(content.querySelectorAll('*')).forEach(el => el.style.opacity = 1);
+        return;
       }
 
+      // Helper: set stagger delays based on visual order: controls children first, then main children
+      function setStaggerDelays() {
+        const order = [];
+        // controls children
+        if (controls) order.push(...Array.from(controls.children));
+        // main children (brand, title, shim, lead, meta)
+        if (main) order.push(...Array.from(main.children));
+        // assign delays starting a bit after card entrance
+        order.forEach((el, idx) => {
+          const delay = 120 + idx * 80; // ms
+          el.style.setProperty('--d', `${delay}ms`);
+        });
+      }
+
+      // Intro timing: show skeleton, then reveal card, then reveal content (staggered)
       window.addEventListener('load', () => {
-        // before anything: ensure buttons are sorted while skeleton still visible
-        // wait for fonts to be ready (if supported) then measure; fallback small timeout
-        const doOrdering = () => {
-          try {
-            measureAndSortButtons();
-          } catch (e) { /* ignore measurement errors */ }
-        };
-
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(() => {
-            doOrdering();
-            // also schedule a very short re-measure in case icons/fonts cause layout shift
-            setTimeout(doOrdering, 60);
-          }).catch(() => { setTimeout(doOrdering, 40); });
-        } else {
-          // quick fallback
-          setTimeout(doOrdering, 30);
-        }
-
-        // if reduced motion, reveal immediately without animations
-        if (reduce) {
-          revealImmediately();
-          return;
-        }
-
-        // keep content hidden initially
+        // initial: keep content hidden
         content.style.opacity = 0;
         content.style.transform = 'translateY(8px)';
 
-        // after ordering, set per-child stagger delays
-        setTimeout(() => setStaggerDelays(), 80);
+        // set stagger delays (controls are first in DOM and first in visual order on wide)
+        // wait briefly for fonts/icons to settle
+        setTimeout(setStaggerDelays, 30);
 
-        // timings (tweakable)
-        const waitBeforeEntrance = 420; // skeleton visible
+        const waitBeforeEntrance = 420;
         const entranceDuration = 720;
         const postEntranceDelay = 120;
 
         setTimeout(() => {
           card.classList.add('revealed');
 
-          // reveal content after entrance finish
           setTimeout(() => {
+            // reveal content wrapper (children have their own per-element delays)
             content.style.opacity = 1;
             content.style.transform = 'translateY(0)';
           }, entranceDuration + postEntranceDelay);
         }, waitBeforeEntrance);
       });
 
-      // re-calc on resize (debounced) to keep order correct if labels wrap / window changes
-      const debouncedResort = debounce(() => {
-        // measure+sort only when skeleton is hidden (or even if visible it's fine)
-        measureAndSortButtons();
-        // reassign delays to follow new DOM order
-        setStaggerDelays();
-      }, 150);
+      // on resize we need to re-assign delays because layout (wrapping) might change visual order
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          setStaggerDelays();
+        }, 120);
+      });
 
-      window.addEventListener('resize', debouncedResort);
-
-      // Ensure reduced-motion branch also sorts buttons
-      if (reduce) {
-        // if fonts load after script run, measure again
-        if (document.fonts && document.fonts.ready) {
-          document.fonts.ready.then(() => measureAndSortButtons()).catch(()=>{});
-        } else {
-          setTimeout(() => measureAndSortButtons(), 40);
-        }
-      }
-
-      // End of IIFE
     })();
   </script>
 </body>
