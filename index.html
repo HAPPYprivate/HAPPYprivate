@@ -228,6 +228,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       const scriptTag = document.getElementById('scriptContent');
       const card = document.getElementById('card');
       const content = card.querySelector('.card-content');
+      const controls = card.querySelector('.controls');
 
       // Button behaviors (unchanged)
       discordBtn && discordBtn.addEventListener('click', () => {
@@ -298,61 +299,148 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       const title = document.getElementById('pageTitle');
       if (title) title.setAttribute('role', 'heading');
 
-      // Respect reduced motion; if user reduces motion, reveal immediately with no animation
-      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) {
-        card.classList.add('revealed');
-        // ensure children visible immediately
-        content.querySelectorAll('*').forEach((el,i) => el.style.opacity = 1);
-        return;
+      // ---------------------------
+      // Button auto-sort logic
+      // ---------------------------
+      // Sorts controls buttons by measured width (largest first).
+      function measureAndSortButtons() {
+        if (!controls) return;
+        const buttons = Array.from(controls.querySelectorAll('.btn'));
+        if (!buttons.length) return;
+
+        // Measure widths (force layout read)
+        const measurements = buttons.map(btn => {
+          // ensure element is visible for accurate measurement:
+          // temporarily set visibility if needed
+          const prevVisibility = btn.style.visibility;
+          btn.style.visibility = 'hidden'; // keep hidden but measurable
+          // read width
+          const rect = btn.getBoundingClientRect();
+          const w = rect.width || btn.scrollWidth || btn.offsetWidth;
+          btn.style.visibility = prevVisibility;
+          return { btn, w };
+        });
+
+        // stable sort by width descending
+        measurements.sort((a,b) => {
+          if (b.w === a.w) return 0;
+          return b.w - a.w;
+        });
+
+        // re-append in sorted order (this moves DOM nodes without cloning events)
+        measurements.forEach(({btn}) => controls.appendChild(btn));
       }
 
-      // ----- Intro sequence -----
-      // 1) On DOMContentLoaded we show only skeleton (card-shell visible but content hidden)
-      // 2) After short wait, animate card entrance (scale/raise/shadow)
-      // 3) Immediately after entrance, hide skeleton and reveal content with staggered children
+      // debounce helper
+      function debounce(fn, wait) {
+        let t;
+        return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
+      }
 
+      // call setStaggerDelays AFTER ordering so delays reflect final DOM order
       function setStaggerDelays() {
-        const children = Array.from(content.children[0].children) // left column container children
-          .concat(Array.from(content.children[1] ? content.children[1].children : [])); // then controls column children
-        // fallback: if structure different, set delays for any direct children
+        // children from left column then controls column
+        const leftCol = content.children[0];
+        const rightCol = content.children[1];
+        let children = [];
+        if (leftCol) children = children.concat(Array.from(leftCol.children));
+        if (rightCol) children = children.concat(Array.from(rightCol.children));
         if (children.length === 0) {
           Array.from(content.children).forEach((el, idx) => el.style.setProperty('--d', `${idx*80}ms`));
           return;
         }
         children.forEach((el, idx) => {
+          // start delays a bit later so card entrance feels cohesive
           el.style.setProperty('--d', `${120 + idx * 80}ms`);
         });
       }
 
-      // Start intro after small initial delay to make the effect noticeable
+      // ---------------------------
+      // Intro & reveal sequence
+      // ---------------------------
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      function revealImmediately() {
+        // used for reduced-motion users
+        measureAndSortButtons();
+        setStaggerDelays();
+        card.classList.add('revealed');
+        // force children visible
+        content.style.opacity = 1;
+        content.style.transform = 'translateY(0)';
+        content.querySelectorAll('*').forEach((el) => el.style.opacity = 1);
+      }
+
       window.addEventListener('load', () => {
-        // ensure content hidden initially
+        // before anything: ensure buttons are sorted while skeleton still visible
+        // wait for fonts to be ready (if supported) then measure; fallback small timeout
+        const doOrdering = () => {
+          try {
+            measureAndSortButtons();
+          } catch (e) { /* ignore measurement errors */ }
+        };
+
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => {
+            doOrdering();
+            // also schedule a very short re-measure in case icons/fonts cause layout shift
+            setTimeout(doOrdering, 60);
+          }).catch(() => { setTimeout(doOrdering, 40); });
+        } else {
+          // quick fallback
+          setTimeout(doOrdering, 30);
+        }
+
+        // if reduced motion, reveal immediately without animations
+        if (reduce) {
+          revealImmediately();
+          return;
+        }
+
+        // keep content hidden initially
         content.style.opacity = 0;
         content.style.transform = 'translateY(8px)';
 
-        // assign stagger delays to inner elements
-        setStaggerDelays();
+        // after ordering, set per-child stagger delays
+        setTimeout(() => setStaggerDelays(), 80);
 
-        // delay before starting entrance (you can tweak these numbers)
-        const waitBeforeEntrance = 420; // ms: visible skeleton time
-        const entranceDuration = 720;   // should match CSS transform timing feel
-        const postEntranceDelay = 120;  // gap before content reveal
+        // timings (tweakable)
+        const waitBeforeEntrance = 420; // skeleton visible
+        const entranceDuration = 720;
+        const postEntranceDelay = 120;
 
         setTimeout(() => {
-          // add revealed class to run the professional entrance
           card.classList.add('revealed');
 
-          // after entrance animation finishes, reveal content
+          // reveal content after entrance finish
           setTimeout(() => {
-            // fade content in (card-content has its own transition)
             content.style.opacity = 1;
             content.style.transform = 'translateY(0)';
-            // also ensure each child uses its --d delay (CSS handles actual transition)
           }, entranceDuration + postEntranceDelay);
         }, waitBeforeEntrance);
       });
 
+      // re-calc on resize (debounced) to keep order correct if labels wrap / window changes
+      const debouncedResort = debounce(() => {
+        // measure+sort only when skeleton is hidden (or even if visible it's fine)
+        measureAndSortButtons();
+        // reassign delays to follow new DOM order
+        setStaggerDelays();
+      }, 150);
+
+      window.addEventListener('resize', debouncedResort);
+
+      // Ensure reduced-motion branch also sorts buttons
+      if (reduce) {
+        // if fonts load after script run, measure again
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(() => measureAndSortButtons()).catch(()=>{});
+        } else {
+          setTimeout(() => measureAndSortButtons(), 40);
+        }
+      }
+
+      // End of IIFE
     })();
   </script>
 </body>
