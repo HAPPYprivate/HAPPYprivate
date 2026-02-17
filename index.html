@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>📜</title>
+  <title>HAPPY script</title>
   <link rel="icon" href="logo.png" type="image/png">
 
   <!-- Fonts + Icons -->
@@ -14,12 +14,12 @@
     :root{
       --bg-a: #040006;
       --bg-b: #0f0714;
-      --glass: rgba(255,255,255,0.03);
       --muted: #cfc6dd;
       --card-border: rgba(155,60,255,0.10);
       --radius: 14px;
-      --glass-strong: rgba(255,255,255,0.04);
       --focus: 3px;
+      --skeleton-bg: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --reveal-ease: cubic-bezier(.18,.9,.22,1);
     }
 
     /* Reset & base */
@@ -57,62 +57,8 @@
       100%{ transform: translateX(0) translateY(0) }
     }
 
-    /* Intro logo animation (improved) */
-    .intro-logo {
-      position:absolute;
-      z-index:100;
-      top:50%;
-      left:50%;
-      width:min(140px, 36vw);
-      height:auto;
-      opacity:0;
-      transform: translate(-50%, -50%) scale(0.86);
-      filter: drop-shadow(0 12px 34px rgba(0,0,0,0.55));
-      pointer-events:none;
-      will-change: transform, top, opacity;
-      backface-visibility: hidden;
-      border-radius: 12px;          /* -> bo góc */
-      overflow: hidden;             /* đảm bảo bo góc áp dụng với ảnh */
-      background: rgba(255,255,255,0.02);
-      transition: box-shadow .18s ease, transform .18s ease;
-    }
-
-    /* play intro after adding .intro-playing; note delay = 1s for the wait you asked */
-    body.intro-playing .intro-logo {
-      animation: introLogoMove 1.2s cubic-bezier(.22,.9,.25,1) 1 forwards;
-      animation-delay: 1s; /* wait 1s before starting */
-    }
-
-    @keyframes introLogoMove {
-      0%   { opacity: 0; top:50%; transform: translate(-50%,-50%) scale(0.86); }
-      30%  { opacity: 1; top:48%; transform: translate(-50%,-50%) scale(1.04); }
-      55%  { top:30%; transform: translate(-50%,-52%) scale(1.00); }
-      78%  { top:16%; transform: translate(-50%,-56%) scale(0.96); }
-      100% { opacity: 1; top:12%; transform: translate(-50%,-60%) scale(0.92); } /* final sticky position */
-    }
-
-    /* once intro done, keep logo visible and add a gentle float animation */
-    .intro-logo.logo-sticky {
-      opacity:1 !important;
-      top:12% !important;
-      transform: translate(-50%,-60%) scale(0.92) !important;
-      animation: logoFloat 6s ease-in-out infinite;
-    }
-
-    @keyframes logoFloat {
-      0%   { transform: translate(-50%,-60%) translateY(0) scale(0.92); }
-      50%  { transform: translate(-50%,-60%) translateY(-6px) scale(0.925); }
-      100% { transform: translate(-50%,-60%) translateY(0) scale(0.92); }
-    }
-
-    /* If user prefers reduced motion, disable these */
-    @media (prefers-reduced-motion: reduce){
-      .bg-blur, .card, .ripple, .btn, .toast, .intro-logo { animation: none !important; transition: none !important; }
-      .happy, .script { animation: none !important; background-size: auto !important; }
-    }
-
-    /* Card */
-    .card {
+    /* CARD shell (always present) */
+    .card-shell {
       z-index:2;
       width:min(920px,96%);
       border-radius:var(--radius);
@@ -120,60 +66,107 @@
       display:grid;
       grid-template-columns: 1fr 320px;
       gap:22px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.12));
-      border: 1px solid var(--card-border);
-      box-shadow: 0 18px 48px rgba(6,6,12,0.6);
-      backdrop-filter: blur(10px) saturate(1.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.06));
+      border: 1px solid rgba(255,255,255,0.02);
+      box-shadow: 0 8px 24px rgba(6,6,12,0.35);
+      backdrop-filter: blur(6px) saturate(1.04);
       align-items:start;
-      transition: transform .32s ease, box-shadow .32s ease;
+      position:relative;
+      overflow:hidden;
+      transition: transform .9s var(--reveal-ease), box-shadow .6s var(--reveal-ease), opacity .6s ease;
+      pointer-events:none; /* locked until reveal */
+      opacity:1;
+      transform: translateY(6px) scale(.995);
+      will-change: transform, box-shadow, opacity;
     }
-    .card:focus-within { box-shadow: 0 28px 68px rgba(6,6,12,0.7); transform: translateY(-4px); }
 
-    body.intro-playing .card {
+    /* skeleton placeholder sits on top while content is hidden */
+    .skeleton {
+      position:absolute;
+      inset:0;
+      z-index:3;
+      border-radius:var(--radius);
+      background: var(--skeleton-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 12px 42px rgba(6,6,12,0.35);
+      display:block;
+      pointer-events:none;
+      overflow:hidden;
+    }
+    /* subtle shimmer on skeleton */
+    .skeleton::after {
+      content: "";
+      position:absolute;
+      inset:0;
+      background: linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0.00) 100%);
+      transform: translateX(-30%);
+      animation: shimmer 2.2s linear infinite;
+      opacity:0.9;
+      mix-blend-mode:overlay;
+    }
+    @keyframes shimmer { to { transform: translateX(130%); } }
+
+    /* CARD revealed state (the professional entrance) */
+    .card-shell.revealed {
+      transform: translateY(0) scale(1);
+      box-shadow: 0 26px 84px rgba(6,6,12,0.66);
+      pointer-events:auto;
+    }
+
+    /* hide skeleton when revealed */
+    .card-shell.revealed .skeleton {
       opacity:0;
-      transform: translateY(20px) scale(0.985);
+      transform: scale(.997);
+      transition: opacity .48s ease, transform .48s var(--reveal-ease);
       pointer-events:none;
     }
-    body.intro-reveal .card {
-      animation: revealCard .72s cubic-bezier(.2,.9,.2,1) forwards;
-    }
-    @keyframes revealCard {
-      0% { opacity:0; transform: translateY(20px) scale(0.985); }
-      100% { opacity:1; transform: translateY(0) scale(1); }
-    }
 
-    /* Brand */
-    .brand {
-      display:inline-block;
-      font-family: "JetBrains Mono", monospace;
-      font-weight:700;
-      color: #caa9ff;
-      letter-spacing:0.6px;
-      font-size:11px;
-      padding:6px 10px;
-      border-radius:9px;
-      background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03));
+    /* content wrapper: initially empty (invisible) then revealed with stagger */
+    .card-content { z-index:2; opacity:0; transform: translateY(8px); transition: opacity .6s ease, transform .6s var(--reveal-ease); }
+    .card-shell.revealed .card-content { opacity:1; transform: translateY(0); }
+
+    /* staggered children inside content */
+    .card-content > * { opacity:0; transform: translateY(8px); will-change: transform, opacity; }
+    .card-shell.revealed .card-content > * {
+      opacity:1;
+      transform: translateY(0);
+      transition: opacity .42s ease, transform .42s var(--reveal-ease);
     }
 
-    /* Title */
-    h1 {
-      margin:14px 0 6px;
-      font-size:36px;
-      color: #fff;
-      line-height:1.03;
-      font-weight:800;
-      display:flex;
-      gap:12px;
-      align-items:center;
-      position:relative;
+    /* We'll set per-child delays via CSS variables (JS assigns them) */
+    .card-content > * { transition-delay: var(--d, 0ms); }
+
+    /* Basic inner styles (kept mostly from your original file) */
+    .brand { display:inline-block; font-family:"JetBrains Mono", monospace; font-weight:700; color:#caa9ff; letter-spacing:0.6px; font-size:11px; padding:6px 10px; border-radius:9px; background: linear-gradient(90deg, rgba(155,60,255,0.06), rgba(90,26,214,0.03)); }
+    h1 { margin:14px 0 6px; font-size:36px; color:#fff; line-height:1.03; font-weight:800; display:flex; gap:12px; align-items:center; }
+    .happy { font-weight:900; font-size:1.05em; background: linear-gradient(90deg,#ff66b2 0%,#ff3fa0 25%,#ff9ad1 50%,#ff66b2 75%,#ffb3e6 100%); background-size:300% 100%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: happyColor 6s linear infinite; filter: drop-shadow(0 6px 16px rgba(255,102,178,0.12)); }
+    @keyframes happyColor { 0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .script { font-weight:800; font-size:1.05em; background: linear-gradient(90deg,#7c3aed 0%,#9b6bff 20%,#5eead4 50%,#7c3aed 80%,#9b6bff 100%); background-size:300% 100%; -webkit-background-clip:text; -webkit-text-fill-color:transparent; animation: scriptColor 7s linear infinite; filter: drop-shadow(0 8px 22px rgba(124,58,237,0.12)); }
+    @keyframes scriptColor { 0%{background-position:0% 50%} 40%{background-position:60% 50%} 80%{background-position:100% 50%} 100%{background-position:0% 50%} }
+    .title-shim { height:6px; border-radius:6px; background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01)); width:60%; margin-top:10px; opacity:0.45; }
+    .lead { margin-top:6px; color:#d9cff0; opacity:0.9; font-size:14px; }
+    .meta { margin-top:12px; color:#cdbff0; font-size:13px; opacity:0.95; }
+    .controls{ display:flex; flex-direction:column; gap:12px; align-items:stretch; justify-content:flex-start; }
+    .btn { position:relative; overflow:hidden; display:flex; gap:12px; align-items:center; justify-content:center; padding:12px 14px; border-radius:10px; cursor:pointer; user-select:none; border:1px solid rgba(255,255,255,0.04); font-weight:700; font-size:15px; transition: transform .12s ease, box-shadow .12s ease, background .18s ease; background: linear-gradient(180deg, rgba(255,255,255,0.008), rgba(0,0,0,0.04)); color:var(--muted); }
+    .btn.primary { background: linear-gradient(90deg,#7c3aed,#5a1ad6); color:#fff; border:none; box-shadow:0 10px 28px rgba(124,58,237,0.12); }
+    .btn.secondary { background: rgba(255,255,255,0.02); }
+    .ripple { position:absolute; border-radius:50%; transform: scale(0); background: rgba(255,255,255,0.12); animation: ripple .6s ease-out forwards; pointer-events:none; }
+    @keyframes ripple { to { transform: scale(3.8); opacity:0; } }
+
+    /* Toast */
+    .toast { position:fixed; left:50%; bottom:36px; transform: translate3d(-50%, 12px, 0); background: linear-gradient(90deg, rgba(124,58,237,0.12), rgba(94,234,212,0.04)); color: #fff; padding:10px 18px; border-radius:999px; box-shadow: 0 10px 36px rgba(8,6,24,0.6); font-weight:700; display:flex; gap:10px; align-items:center; opacity:0; pointer-events:none; transition: transform .25s cubic-bezier(.2,.9,.1,1), opacity .25s ease; }
+    .toast.show { transform: translate3d(-50%, 0, 0); opacity:1; pointer-events:auto; }
+
+    /* Responsive */
+    @media (max-width:900px){ .card-shell{ grid-template-columns:1fr; padding:20px; gap:16px; } }
+
+    /* Respect reduced motion */
+    @media (prefers-reduced-motion: reduce){
+      .bg-blur, .card-shell, .skeleton, .card-content > * { animation: none !important; transition: none !important; transform: none !important; opacity:1 !important; }
+      .card-shell { pointer-events:auto; box-shadow: 0 18px 48px rgba(6,6,12,0.6); }
+      .skeleton { display:none; }
     }
 
-    .happy { /* animated pink */ /* ... same as before */ }
-    .script { /* animated purple-teal */ /* ... same as before */ }
-    /* (I kept the rest of your styles the same; omitted here for brevity in the comment) */
-
-    /* keep rest of your existing styles unchanged from original file */
-    /* For brevity in this example, copy your previous styles for .happy, .script, .controls, .btn, .toast, etc. */
   </style>
 </head>
 
@@ -181,42 +174,46 @@
   <div class="wrap" role="main" aria-labelledby="pageTitle">
     <div class="bg-blur" aria-hidden="true"></div>
 
-    <!-- Logo -->
-    <img src="logo.png" alt="HAPPY logo" class="intro-logo" aria-hidden="true" />
+    <!-- Card shell always present; skeleton shows first, content hidden -->
+    <div id="card" class="card-shell" role="region" aria-label="HAPPY script card">
+      <div class="skeleton" aria-hidden="true"></div>
 
-    <div class="card" role="region" aria-label="HAPPY script card">
-      <div>
-        <span class="brand" aria-hidden="true">Dev by HAPPY script</span>
+      <div class="card-content" aria-hidden="false">
+        <div>
+          <span class="brand" aria-hidden="true">Dev by HAPPY script</span>
 
-        <h1 id="pageTitle">
-          <span class="happy">HAPPY</span>
-          <span class="script">script</span>
-        </h1>
+          <h1 id="pageTitle">
+            <span class="happy">HAPPY</span>
+            <span class="script">script</span>
+          </h1>
 
-        <div class="title-shim" aria-hidden="true"></div>
-        <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or you can report any issues you encounter while using HAPPY scripts.</p>
+          <div class="title-shim" aria-hidden="true"></div>
+          <p class="lead">Join my Discord community to stay updated on HAPPY scripts, or you can report any issues you encounter while using HAPPY scripts.</p>
 
-        <div class="meta" aria-hidden="true">Please don't try to read the raw script 😭.</div>
-      </div>
+          <div class="meta" aria-hidden="true">Please don't try to read the raw script 😭.</div>
+        </div>
 
-      <div class="controls" role="region" aria-label="Actions">
-        <button id="discordBtn" class="btn primary" type="button" title="Open Discord (new tab)" aria-label="Open Discord">
-          <span class="icon" aria-hidden="true"><i class="fab fa-discord"></i></span>
-          <span>Join Discord</span>
-        </button>
+        <div class="controls" role="region" aria-label="Actions">
+          <button id="discordBtn" class="btn primary" type="button" title="Open Discord (new tab)" aria-label="Open Discord">
+            <span class="icon" aria-hidden="true"><i class="fab fa-discord"></i></span>
+            <span>Join Discord</span>
+          </button>
 
-        <button id="copyBtn" class="btn secondary" type="button" title="Copy script to clipboard" aria-label="Copy script to clipboard">
-          <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
-          <span>Copy script</span>
-        </button>
+          <button id="copyBtn" class="btn secondary" type="button" title="Copy script to clipboard" aria-label="Copy script to clipboard">
+            <span class="icon" aria-hidden="true"><i class="fa-solid fa-copy"></i></span>
+            <span>Copy script</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- toast -->
   <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true">
     <span id="toastText">Copied</span>
   </div>
 
+  <!-- hidden script content -->
   <script id="scriptContent" type="text/plain">
 loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
   </script>
@@ -229,15 +226,14 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       const toastEl = document.getElementById('toast');
       const toastText = document.getElementById('toastText');
       const scriptTag = document.getElementById('scriptContent');
-      const logo = document.querySelector('.intro-logo');
+      const card = document.getElementById('card');
+      const content = card.querySelector('.card-content');
 
-      // Open discord safely
-      discordBtn.addEventListener('click', () => {
-        try { window.open(DISCORD_URL, '_blank', 'noopener,noreferrer'); }
-        catch(e){ showToast('Could not open link', false); }
+      // Button behaviors (unchanged)
+      discordBtn && discordBtn.addEventListener('click', () => {
+        try { window.open(DISCORD_URL, '_blank', 'noopener,noreferrer'); } catch(e){ showToast('Could not open link', false); }
       });
 
-      // Show toast helper
       let toastTimer = null;
       function showToast(message = 'Copied', ok = true) {
         toastText.textContent = message;
@@ -247,7 +243,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
       }
 
-      // Copy logic with fallback
       async function copyScript() {
         const txt = scriptTag && scriptTag.textContent ? scriptTag.textContent.trim() : '';
         if (!txt) { showToast('No script available', false); return; }
@@ -270,7 +265,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       }
 
-      // Ripple visual for button
+      // ripple visual for buttons
       function rippleEffect(ev) {
         const btn = ev.currentTarget;
         const rect = btn.getBoundingClientRect();
@@ -284,11 +279,12 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         setTimeout(() => r.remove(), 700);
       }
 
-      copyBtn.addEventListener('click', (ev) => {
-        try { rippleEffect(ev); } catch(e) { /* ignore */ }
+      copyBtn && copyBtn.addEventListener('click', (ev) => {
+        try { rippleEffect(ev); } catch(e) {}
         copyScript();
       });
 
+      // Keyboard shortcut
       window.addEventListener('keydown', (e) => {
         if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'c') {
           const sel = window.getSelection();
@@ -298,30 +294,65 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // Respect reduced motion
-      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        document.querySelectorAll('.bg-blur').forEach(n => n.style.animation = 'none');
-      } else {
-        document.body.classList.add('intro-playing');
-
-        // reveal card after logo animation start + some delay
-        setTimeout(() => {
-          document.body.classList.add('intro-reveal');
-          document.body.classList.remove('intro-playing');
-        }, 1400 + 1000); // keep original cadence but offset for the 1s delay
-
-        // after the intro finishes, keep the logo visible and add sticky float
-        // choose a timeout equal to (animation-delay 1s + animation duration 1.2s + small buffer)
-        setTimeout(() => {
-          document.body.classList.add('intro-done');
-          document.body.classList.remove('intro-reveal');
-          if (logo) logo.classList.add('logo-sticky'); // keep logo visible and animate float
-        }, 1000 + 1200 + 200); // 1s delay + 1.2s animation + 200ms buffer
-      }
-
-      // Accessibility: ensure heading role
+      // Accessibility
       const title = document.getElementById('pageTitle');
       if (title) title.setAttribute('role', 'heading');
+
+      // Respect reduced motion; if user reduces motion, reveal immediately with no animation
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) {
+        card.classList.add('revealed');
+        // ensure children visible immediately
+        content.querySelectorAll('*').forEach((el,i) => el.style.opacity = 1);
+        return;
+      }
+
+      // ----- Intro sequence -----
+      // 1) On DOMContentLoaded we show only skeleton (card-shell visible but content hidden)
+      // 2) After short wait, animate card entrance (scale/raise/shadow)
+      // 3) Immediately after entrance, hide skeleton and reveal content with staggered children
+
+      function setStaggerDelays() {
+        const children = Array.from(content.children[0].children) // left column container children
+          .concat(Array.from(content.children[1] ? content.children[1].children : [])); // then controls column children
+        // fallback: if structure different, set delays for any direct children
+        if (children.length === 0) {
+          Array.from(content.children).forEach((el, idx) => el.style.setProperty('--d', `${idx*80}ms`));
+          return;
+        }
+        children.forEach((el, idx) => {
+          el.style.setProperty('--d', `${120 + idx * 80}ms`);
+        });
+      }
+
+      // Start intro after small initial delay to make the effect noticeable
+      window.addEventListener('load', () => {
+        // ensure content hidden initially
+        content.style.opacity = 0;
+        content.style.transform = 'translateY(8px)';
+
+        // assign stagger delays to inner elements
+        setStaggerDelays();
+
+        // delay before starting entrance (you can tweak these numbers)
+        const waitBeforeEntrance = 420; // ms: visible skeleton time
+        const entranceDuration = 720;   // should match CSS transform timing feel
+        const postEntranceDelay = 120;  // gap before content reveal
+
+        setTimeout(() => {
+          // add revealed class to run the professional entrance
+          card.classList.add('revealed');
+
+          // after entrance animation finishes, reveal content
+          setTimeout(() => {
+            // fade content in (card-content has its own transition)
+            content.style.opacity = 1;
+            content.style.transform = 'translateY(0)';
+            // also ensure each child uses its --d delay (CSS handles actual transition)
+          }, entranceDuration + postEntranceDelay);
+        }, waitBeforeEntrance);
+      });
+
     })();
   </script>
 </body>
