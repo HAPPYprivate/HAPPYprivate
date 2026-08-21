@@ -34,7 +34,11 @@
       --ease-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Reset & Base */
+    /* Reset & Base - ẨN CON TRỎ MẶC ĐỊNH TRÊN DESKTOP */
+    @media (pointer: fine) {
+      * { cursor: none !important; }
+    }
+    
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
@@ -45,8 +49,48 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden; /* Prevent scrolling for the full-screen effect */
-      perspective: 1000px; /* Enable 3D space */
+      overflow: hidden;
+      perspective: 1000px;
+    }
+
+    /* CUSTOM CURSOR - CON TRỎ CHUỘT MỚI */
+    .cursor-dot {
+      position: fixed; top: 0; left: 0;
+      width: 6px; height: 6px;
+      background: var(--neon-cyan);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 9999;
+      box-shadow: 0 0 10px var(--neon-cyan);
+      transition: width 0.2s, height 0.2s, background-color 0.2s;
+    }
+    
+    .cursor-outline {
+      position: fixed; top: 0; left: 0;
+      width: 30px; height: 30px;
+      border: 1.5px solid var(--neon-pink);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none; z-index: 9998;
+      box-shadow: 0 0 15px rgba(255, 42, 133, 0.4);
+      transition: width 0.2s, height 0.2s, border-color 0.2s, background-color 0.2s;
+    }
+
+    /* Hiệu ứng trỏ chuột khi vào nút bấm */
+    .cursor-hover .cursor-dot {
+      width: 0; height: 0;
+    }
+    .cursor-hover .cursor-outline {
+      width: 45px; height: 45px;
+      background-color: rgba(0, 245, 212, 0.1);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
+    }
+
+    /* Ẩn cursor tự tạo trên điện thoại */
+    @media (max-width: 850px) {
+      .cursor-dot, .cursor-outline { display: none; }
+      * { cursor: auto !important; }
     }
 
     /* Ambient Background - Cyberpunk style */
@@ -108,10 +152,10 @@
       gap: 40px;
       align-items: center;
       
-      /* 3D Entry Animation */
+      /* SỬA LỖI FADE: Định nghĩa rõ ràng hiệu ứng nào chậm, hiệu ứng nào nhanh */
       opacity: 0;
       transform: rotateX(-10deg) translateY(40px) scale(0.95);
-      transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.5s ease-out, box-shadow 0.6s ease, opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .glass-panel.revealed {
@@ -121,10 +165,9 @@
 
     /* Floating effect on hover */
     .glass-panel:hover {
-      transform: translateY(-5px);
       box-shadow: 
         0 15px 40px 0 rgba(0, 0, 0, 0.5),
-        0 0 40px rgba(157, 78, 221, 0.2), /* Purple glow */
+        0 0 50px rgba(157, 78, 221, 0.3), /* Tăng glow mượt */
         inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
@@ -137,11 +180,7 @@
     }
 
     /* Left Side Content */
-    .content-area {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+    .content-area { display: flex; flex-direction: column; gap: 16px; }
 
     /* Badge */
     .badge {
@@ -159,7 +198,13 @@
       box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
     }
 
-    /* Main Title - Glitch & Glow Effect */
+    /* ANIMATION CHO TITLE (GRADIENT FLOW) */
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     h1 {
       font-size: clamp(3rem, 5vw, 4.5rem);
       font-weight: 700;
@@ -171,47 +216,54 @@
       position: relative;
     }
 
+    /* Pink Title */
     .text-glow-pink {
       color: transparent;
-      background: linear-gradient(to right, var(--neon-pink), #ff7eb3);
+      /* Thêm nhiều màu để hiệu ứng chạy thấy rõ hơn */
+      background: linear-gradient(270deg, var(--neon-pink), #ff7eb3, var(--neon-purple), var(--neon-pink));
+      background-size: 300% 300%;
       -webkit-background-clip: text;
       background-clip: text;
-      text-shadow: 0 0 20px rgba(255, 42, 133, 0.4);
+      animation: gradientFlow 5s ease infinite;
       position: relative;
     }
     
     .text-glow-pink::after {
         content: 'HAPPY';
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 0; top: 0;
         color: transparent;
-        background: linear-gradient(to right, var(--neon-pink), #ff7eb3);
+        background: linear-gradient(270deg, var(--neon-pink), #ff7eb3, var(--neon-purple), var(--neon-pink));
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         background-clip: text;
+        animation: gradientFlow 5s ease infinite;
         filter: blur(12px);
         opacity: 0.6;
         z-index: -1;
     }
 
+    /* Cyan Title */
     .text-glow-cyan {
       color: transparent;
-      background: linear-gradient(to right, var(--neon-cyan), #72efdd);
+      background: linear-gradient(270deg, var(--neon-cyan), #72efdd, #00b4d8, var(--neon-cyan));
+      background-size: 300% 300%;
       -webkit-background-clip: text;
       background-clip: text;
-      text-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
+      animation: gradientFlow 6s ease infinite; /* Chạy lệch nhịp với Pink tạo sự tự nhiên */
       position: relative;
     }
     
     .text-glow-cyan::after {
         content: 'script';
         position: absolute;
-        left: 0;
-        top: 0;
+        left: 0; top: 0;
         color: transparent;
-        background: linear-gradient(to right, var(--neon-cyan), #72efdd);
+        background: linear-gradient(270deg, var(--neon-cyan), #72efdd, #00b4d8, var(--neon-cyan));
+        background-size: 300% 300%;
         -webkit-background-clip: text;
         background-clip: text;
+        animation: gradientFlow 6s ease infinite;
         filter: blur(12px);
         opacity: 0.6;
         z-index: -1;
@@ -236,21 +288,8 @@
       gap: 8px;
     }
 
-    .warning-text i { font-size: 0.9rem; }
-
-    /* Right Side - Actions & Terminal */
-    .action-area {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-    }
-
-    /* Buttons */
-    .btn-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+    .action-area { display: flex; flex-direction: column; gap: 20px; }
+    .btn-group { display: flex; flex-direction: column; gap: 12px; }
 
     .btn-custom {
       position: relative;
@@ -265,14 +304,12 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      cursor: pointer;
       overflow: hidden;
       transition: all 0.3s var(--ease-bouncy);
       border: none;
       z-index: 1;
     }
 
-    /* Primary Button (Discord) */
     .btn-discord {
       background: linear-gradient(135deg, #5865F2, #4752C4);
       color: white;
@@ -294,7 +331,6 @@
     }
     .btn-discord:hover::before { left: 100%; }
 
-    /* Secondary Button (Copy) - Terminal Style */
     .btn-copy {
       background: rgba(0, 0, 0, 0.4);
       border: 1px solid rgba(0, 245, 212, 0.3);
@@ -309,7 +345,7 @@
       transform: translateY(-2px);
     }
 
-    /* Terminal Window Mockup */
+    /* Terminal */
     .terminal-window {
       background: #0a0a0f;
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -340,17 +376,16 @@
       color: #a8b2d1;
       white-space: pre-wrap;
       word-break: break-all;
-      position: relative;
     }
     
     .keyword { color: var(--neon-pink); }
     .string { color: var(--neon-cyan); }
     .function { color: var(--neon-purple); }
 
-    /* Toast Notification - Cyber style */
+    /* Toast Notification */
     .cyber-toast {
       position: fixed;
-      bottom: -100px; /* Start hidden below */
+      bottom: -100px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(10, 10, 15, 0.9);
@@ -368,11 +403,9 @@
       z-index: 100;
       backdrop-filter: blur(10px);
     }
-
     .cyber-toast.show { bottom: 40px; }
     .cyber-toast.error { border-left-color: #ff4d4d; box-shadow: 0 0 20px rgba(255, 77, 77, 0.1); }
     
-    /* Particles Canvas */
     #particles {
       position: absolute;
       inset: 0;
@@ -383,6 +416,10 @@
 </head>
 
 <body>
+  <!-- Custom Cursor Elements -->
+  <div class="cursor-dot" id="cursorDot"></div>
+  <div class="cursor-outline" id="cursorOutline"></div>
+
   <!-- Background Elements -->
   <div class="ambient-bg"></div>
   <div class="grid-overlay"></div>
@@ -448,13 +485,35 @@
     <span id="toastText">Payload copied to clipboard.</span>
   </div>
 
-  <!-- Hidden Script Data -->
   <script id="scriptContent" type="text/plain">
 loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
   </script>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      
+      // === Custom Cursor Logic ===
+      const cursorDot = document.getElementById('cursorDot');
+      const cursorOutline = document.getElementById('cursorOutline');
+      
+      window.addEventListener('mousemove', (e) => {
+        // Chấm tròn bên trong đi theo lập tức
+        cursorDot.style.left = `${e.clientX}px`;
+        cursorDot.style.top = `${e.clientY}px`;
+        
+        // Vòng tròn bên ngoài đi theo có độ trễ mượt mà (API Animation mới của trình duyệt)
+        cursorOutline.animate({
+          left: `${e.clientX}px`,
+          top: `${e.clientY}px`
+        }, { duration: 200, fill: "forwards" });
+      });
+
+      // Bắt sự kiện rê chuột vào các phần tử tương tác (button, link)
+      document.querySelectorAll('button, a').forEach(el => {
+        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+      });
+
       // 1. Reveal Animation
       setTimeout(() => {
         document.getElementById('mainCard').classList.add('revealed');
@@ -473,7 +532,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
 
       function showToast(message, isError = false) {
         toastText.textContent = message;
-        
         if (isError) {
           toast.classList.add('error');
           toastIcon.className = 'fa-solid fa-xmark';
@@ -485,7 +543,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
 
         toast.classList.add('show');
-        
         clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => {
           toast.classList.remove('show');
@@ -502,7 +559,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
           await navigator.clipboard.writeText(txt);
           showToast('Payload copied to clipboard.');
           
-          // Visual feedback on button
           const originalText = copyBtn.innerHTML;
           copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
           copyBtn.style.background = 'rgba(0, 245, 212, 0.1)';
@@ -512,7 +568,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
           }, 2000);
 
         } catch (err) {
-          // Fallback
           const ta = document.createElement('textarea');
           ta.value = txt;
           ta.style.position = 'fixed';
@@ -529,16 +584,15 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // 3. 3D Hover Effect on Card
+      // 3. 3D Hover Effect on Card - ĐÃ FIX LỖI FADE CHỚP NHÁY
       const card = document.getElementById('mainCard');
       
       document.addEventListener('mousemove', (e) => {
-        if(window.innerWidth < 850) return; // Disable on small screens
+        if(window.innerWidth < 850) return; 
         
         const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
         const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
         
-        // Apply tiny rotation based on mouse position
         if(card.classList.contains('revealed')) {
              card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg) translateY(-5px)`;
         }
@@ -547,12 +601,14 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       document.addEventListener('mouseleave', () => {
          if(card.classList.contains('revealed')) {
             card.style.transform = `rotateY(0deg) rotateX(0deg) translateY(0)`;
-            card.style.transition = 'transform 0.5s ease';
+            // Khôi phục lại transition gốc của CSS
+            card.style.transition = 'transform 0.5s ease-out, box-shadow 0.6s ease';
          }
       });
       
       card.addEventListener('mouseenter', () => {
-         card.style.transition = 'none'; // Remove transition while moving
+         // CỐT LÕI NẰM Ở ĐÂY: Chỉ để transform (3D) diễn ra nhanh, còn box-shadow (phát sáng) vẫn fade mượt 0.6s
+         card.style.transition = 'transform 0.1s ease-out, box-shadow 0.6s ease'; 
       });
 
 
@@ -575,10 +631,9 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
           this.x = Math.random() * width;
           this.y = Math.random() * height;
           this.size = Math.random() * 2 + 0.5;
-          this.speedY = Math.random() * -0.5 - 0.1; // Float up
+          this.speedY = Math.random() * -0.5 - 0.1;
           this.speedX = (Math.random() - 0.5) * 0.5;
           this.opacity = Math.random() * 0.5;
-          // Randomly assign pink or cyan color
           this.color = Math.random() > 0.5 ? 'rgba(255, 42, 133, ' : 'rgba(0, 245, 212, ';
         }
         update() {
