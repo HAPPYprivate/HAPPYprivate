@@ -150,13 +150,14 @@
       100% { background-position: 0% 50%; }
     }
 
-    h1 {
+  h1 {
       font-size: clamp(2.5rem, 5vw, 4.5rem);
       font-weight: 700;
       line-height: 1.1;
       letter-spacing: -1px;
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap; /* Thay đổi thành nowrap */
+      white-space: nowrap; /* Thêm dòng này để khóa cứng việc xuống dòng */
       column-gap: 16px;
       position: relative;
     }
