@@ -12,22 +12,15 @@
 
   <style>
     :root {
-      /* Darker, richer background palette */
       --bg-dark: #020005;
       --bg-accent: #11051c;
-      
-      /* Neon accents */
       --neon-pink: #ff2a85;
       --neon-purple: #9d4edd;
       --neon-cyan: #00f5d4;
-      
-      /* Glassmorphism variables */
       --glass-bg: rgba(18, 5, 28, 0.4);
       --glass-border: rgba(255, 255, 255, 0.08);
-      
       --text-main: #f8f9fa;
       --text-muted: #adb5bd;
-      
       --radius-lg: 24px;
       --radius-sm: 12px;
       --ease-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -39,19 +32,19 @@
       font-family: 'Space Grotesk', sans-serif;
       background-color: var(--bg-dark);
       color: var(--text-main);
-      min-height: 100vh;
+      
+      /* FIX 1: Khóa cứng chiều cao, căn giữa tuyệt đối và loại bỏ hoàn toàn scroll */
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden; 
+      
       display: flex;
       align-items: center;
       justify-content: center;
-      
-      /* FIX 1: Cho phép cuộn trên mobile, chống trượt ngang */
-      overflow-x: hidden;
-      overflow-y: auto;
-      padding: 20px; /* Thêm khoảng cách an toàn 2 bên và trên dưới */
+      padding: 20px;
       perspective: 1000px;
     }
 
-    /* FIX 2: Đổi absolute thành fixed để nền bao phủ toàn màn hình ngay cả khi cuộn */
     .ambient-bg {
       position: fixed;
       inset: 0;
@@ -94,10 +87,10 @@
       position: relative;
       z-index: 10;
       
-      /* FIX 3: Scale tốt hơn cho form */
+      /* FIX 2: Bỏ margin: auto, kiểm soát kích thước chặt chẽ để không tràn */
       width: 100%;
       max-width: 900px;
-      margin: auto; /* Giúp căn giữa chuẩn xác khi kết hợp với flex */
+      max-height: 100%; 
       
       padding: 48px;
       border-radius: var(--radius-lg);
@@ -133,29 +126,6 @@
         inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
-    /* FIX 4: Media Queries scale mượt cho Tablet và Mobile */
-    @media (max-width: 850px) {
-      .glass-panel { 
-        grid-template-columns: 1fr; 
-        padding: 40px 32px;
-        gap: 32px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .glass-panel { 
-        padding: 32px 20px; /* Nhỏ hơn nữa cho mobile để không sát lề */
-        gap: 24px;
-      }
-      h1 {
-        font-size: clamp(2.5rem, 8vw, 3.5rem) !important; /* Scale chữ title trên mobile */
-      }
-      .btn-custom {
-        padding: 14px 20px;
-        font-size: 0.9rem;
-      }
-    }
-
     /* Left Side Content */
     .content-area { display: flex; flex-direction: column; gap: 16px; }
 
@@ -181,7 +151,7 @@
     }
 
     h1 {
-      font-size: clamp(3rem, 5vw, 4.5rem);
+      font-size: clamp(2.5rem, 5vw, 4.5rem);
       font-weight: 700;
       line-height: 1.1;
       letter-spacing: -1px;
@@ -243,9 +213,9 @@
 
     p.description {
       font-size: 1.05rem;
-      line-height: 1.6;
+      line-height: 1.5;
       color: var(--text-muted);
-      margin-top: 8px;
+      margin-top: 4px;
     }
 
     .warning-text {
@@ -253,7 +223,7 @@
       font-size: 0.8rem;
       color: #ff4d4d;
       opacity: 0.8;
-      margin-top: 8px;
+      margin-top: 4px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -378,12 +348,50 @@
     .cyber-toast.show { bottom: 40px; }
     .cyber-toast.error { border-left-color: #ff4d4d; box-shadow: 0 0 20px rgba(255, 77, 77, 0.1); }
     
-    /* FIX: Hạt particle cũng cần fixed để không trôi khi scroll */
     #particles {
       position: fixed;
       inset: 0;
       z-index: 2;
       pointer-events: none;
+    }
+
+    /* FIX 3: Tối ưu Responsive cực kỳ cẩn thận để không bao giờ bị Scroll */
+    @media (max-width: 850px) {
+      .glass-panel { 
+        grid-template-columns: 1fr; 
+        padding: 32px;
+        gap: 24px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      body { padding: 15px; }
+      .glass-panel { 
+        padding: 24px 20px;
+        gap: 16px;
+      }
+      h1 {
+        font-size: clamp(2rem, 8vw, 2.5rem) !important;
+        column-gap: 10px;
+      }
+      .content-area { gap: 10px; }
+      .action-area { gap: 16px; }
+      p.description { font-size: 0.9rem; }
+      .btn-custom {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+      }
+      .terminal-body { padding: 12px; font-size: 0.75rem; }
+    }
+
+    /* Hỗ trợ riêng cho các màn hình điện thoại nằm ngang hoặc quá lùn */
+    @media (max-height: 650px) {
+      .glass-panel { padding: 16px 20px; gap: 12px; }
+      h1 { font-size: 2rem !important; }
+      .content-area { gap: 8px; }
+      p.description { font-size: 0.85rem; line-height: 1.3; }
+      .terminal-body { padding: 10px; }
+      .btn-custom { padding: 10px 16px; }
     }
   </style>
 </head>
@@ -427,9 +435,7 @@
           <div class="dot dot-green"></div>
           <div class="terminal-title">executor.lua</div>
         </div>
-        <div class="terminal-body">
-<span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()
-        </div>
+        <div class="terminal-body"><span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()</div>
       </div>
 
       <!-- Buttons -->
