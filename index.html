@@ -24,7 +24,6 @@
       /* Glassmorphism variables */
       --glass-bg: rgba(18, 5, 28, 0.4);
       --glass-border: rgba(255, 255, 255, 0.08);
-      --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
       
       --text-main: #f8f9fa;
       --text-muted: #adb5bd;
@@ -34,11 +33,6 @@
       --ease-bouncy: cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
-    /* Reset & Base - ẨN CON TRỎ MẶC ĐỊNH TRÊN DESKTOP */
-    @media (pointer: fine) {
-      * { cursor: none !important; }
-    }
-    
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
@@ -51,46 +45,6 @@
       justify-content: center;
       overflow: hidden;
       perspective: 1000px;
-    }
-
-    /* CUSTOM CURSOR - CON TRỎ CHUỘT MỚI */
-    .cursor-dot {
-      position: fixed; top: 0; left: 0;
-      width: 6px; height: 6px;
-      background: var(--neon-cyan);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none; z-index: 9999;
-      box-shadow: 0 0 10px var(--neon-cyan);
-      transition: width 0.2s, height 0.2s, background-color 0.2s;
-    }
-    
-    .cursor-outline {
-      position: fixed; top: 0; left: 0;
-      width: 30px; height: 30px;
-      border: 1.5px solid var(--neon-pink);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      pointer-events: none; z-index: 9998;
-      box-shadow: 0 0 15px rgba(255, 42, 133, 0.4);
-      transition: width 0.2s, height 0.2s, border-color 0.2s, background-color 0.2s;
-    }
-
-    /* Hiệu ứng trỏ chuột khi vào nút bấm */
-    .cursor-hover .cursor-dot {
-      width: 0; height: 0;
-    }
-    .cursor-hover .cursor-outline {
-      width: 45px; height: 45px;
-      background-color: rgba(0, 245, 212, 0.1);
-      border-color: var(--neon-cyan);
-      box-shadow: 0 0 20px rgba(0, 245, 212, 0.4);
-    }
-
-    /* Ẩn cursor tự tạo trên điện thoại */
-    @media (max-width: 850px) {
-      .cursor-dot, .cursor-outline { display: none; }
-      * { cursor: auto !important; }
     }
 
     /* Ambient Background - Cyberpunk style */
@@ -143,8 +97,13 @@
       backdrop-filter: blur(16px) saturate(180%);
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       border: 1px solid var(--glass-border);
+      
+      /* FIX LỖI CHỚP VIỀN SÁNG: 
+         Phải có đủ 3 layer shadow giống như lúc hover, nhưng layer giữa để trong suốt (rgba 0) 
+         thì CSS mới hiểu để làm mượt transition */
       box-shadow: 
-        var(--glass-shadow),
+        0 8px 32px 0 rgba(0, 0, 0, 0.4),
+        0 0 0px rgba(157, 78, 221, 0), 
         inset 0 1px 0 rgba(255,255,255,0.1);
       
       display: grid;
@@ -152,7 +111,6 @@
       gap: 40px;
       align-items: center;
       
-      /* SỬA LỖI FADE: Định nghĩa rõ ràng hiệu ứng nào chậm, hiệu ứng nào nhanh */
       opacity: 0;
       transform: rotateX(-10deg) translateY(40px) scale(0.95);
       transition: transform 0.5s ease-out, box-shadow 0.6s ease, opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
@@ -165,9 +123,10 @@
 
     /* Floating effect on hover */
     .glass-panel:hover {
+      /* Lúc hover cũng có đúng 3 layer shadow */
       box-shadow: 
         0 15px 40px 0 rgba(0, 0, 0, 0.5),
-        0 0 50px rgba(157, 78, 221, 0.3), /* Tăng glow mượt */
+        0 0 50px rgba(157, 78, 221, 0.3), 
         inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
@@ -198,7 +157,7 @@
       box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
     }
 
-    /* ANIMATION CHO TITLE (GRADIENT FLOW) */
+    /* ANIMATION CHO TITLE */
     @keyframes gradientFlow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -219,7 +178,6 @@
     /* Pink Title */
     .text-glow-pink {
       color: transparent;
-      /* Thêm nhiều màu để hiệu ứng chạy thấy rõ hơn */
       background: linear-gradient(270deg, var(--neon-pink), #ff7eb3, var(--neon-purple), var(--neon-pink));
       background-size: 300% 300%;
       -webkit-background-clip: text;
@@ -250,7 +208,7 @@
       background-size: 300% 300%;
       -webkit-background-clip: text;
       background-clip: text;
-      animation: gradientFlow 6s ease infinite; /* Chạy lệch nhịp với Pink tạo sự tự nhiên */
+      animation: gradientFlow 6s ease infinite;
       position: relative;
     }
     
@@ -308,6 +266,7 @@
       transition: all 0.3s var(--ease-bouncy);
       border: none;
       z-index: 1;
+      cursor: pointer;
     }
 
     .btn-discord {
@@ -416,10 +375,6 @@
 </head>
 
 <body>
-  <!-- Custom Cursor Elements -->
-  <div class="cursor-dot" id="cursorDot"></div>
-  <div class="cursor-outline" id="cursorOutline"></div>
-
   <!-- Background Elements -->
   <div class="ambient-bg"></div>
   <div class="grid-overlay"></div>
@@ -438,7 +393,7 @@
       </h1>
       
       <p class="description">
-        Join the elite Discord collective. Stay updated on the latest builds, share configurations, and report anomalies directly to the devs.
+        Join the official HAPPY Script Discord community. Follow development updates, discover new features, and stay up to date with everything released by the creator of HAPPY Script.
       </p>
       
       <div class="warning-text">
@@ -467,12 +422,12 @@
       <div class="btn-group">
         <button id="discordBtn" class="btn-custom btn-discord">
           <i class="fa-brands fa-discord fa-lg"></i>
-          Join Collective
+          JOIN DISCORD
         </button>
         
         <button id="copyBtn" class="btn-custom btn-copy">
           <i class="fa-solid fa-terminal"></i>
-          Copy Payload
+          COPY SCRIPT
         </button>
       </div>
 
@@ -492,28 +447,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       
-      // === Custom Cursor Logic ===
-      const cursorDot = document.getElementById('cursorDot');
-      const cursorOutline = document.getElementById('cursorOutline');
-      
-      window.addEventListener('mousemove', (e) => {
-        // Chấm tròn bên trong đi theo lập tức
-        cursorDot.style.left = `${e.clientX}px`;
-        cursorDot.style.top = `${e.clientY}px`;
-        
-        // Vòng tròn bên ngoài đi theo có độ trễ mượt mà (API Animation mới của trình duyệt)
-        cursorOutline.animate({
-          left: `${e.clientX}px`,
-          top: `${e.clientY}px`
-        }, { duration: 200, fill: "forwards" });
-      });
-
-      // Bắt sự kiện rê chuột vào các phần tử tương tác (button, link)
-      document.querySelectorAll('button, a').forEach(el => {
-        el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
-        el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
-      });
-
       // 1. Reveal Animation
       setTimeout(() => {
         document.getElementById('mainCard').classList.add('revealed');
@@ -560,7 +493,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
           showToast('Payload copied to clipboard.');
           
           const originalText = copyBtn.innerHTML;
-          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> COPIED!';
           copyBtn.style.background = 'rgba(0, 245, 212, 0.1)';
           setTimeout(() => {
             copyBtn.innerHTML = originalText;
@@ -584,33 +517,41 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // 3. 3D Hover Effect on Card - ĐÃ FIX LỖI FADE CHỚP NHÁY
+      // 3. 3D Hover Effect - ĐÃ FIX LỖI LỆCH NÚT
       const card = document.getElementById('mainCard');
       
-      document.addEventListener('mousemove', (e) => {
+      card.addEventListener('mousemove', (e) => {
         if(window.innerWidth < 850) return; 
         
-        const xAxis = (window.innerWidth / 2 - e.pageX) / 50;
-        const yAxis = (window.innerHeight / 2 - e.pageY) / 50;
+        // Tính toán tọa độ chuột NGAY TRONG BẢN THÂN THẺ CARD (Fix triệt để lỗi lệch hitbox)
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left; 
+        const y = e.clientY - rect.top;
+        
+        const centerX = rect.width / 2;
+        const centerY = rect.height / 2;
+        
+        // Tính góc nghiêng (giảm hệ số để đỡ bị quá gắt)
+        const rotateX = ((y - centerY) / centerY) * -8;
+        const rotateY = ((x - centerX) / centerX) * 8;
         
         if(card.classList.contains('revealed')) {
-             card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg) translateY(-5px)`;
+             card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
         }
       });
 
-      document.addEventListener('mouseleave', () => {
+      card.addEventListener('mouseleave', () => {
          if(card.classList.contains('revealed')) {
-            card.style.transform = `rotateY(0deg) rotateX(0deg) translateY(0)`;
+            card.style.transform = `rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)`;
             // Khôi phục lại transition gốc của CSS
             card.style.transition = 'transform 0.5s ease-out, box-shadow 0.6s ease';
          }
       });
       
       card.addEventListener('mouseenter', () => {
-         // CỐT LÕI NẰM Ở ĐÂY: Chỉ để transform (3D) diễn ra nhanh, còn box-shadow (phát sáng) vẫn fade mượt 0.6s
+         // Để transform (3D) diễn ra nhanh, còn box-shadow (phát sáng) vẫn fade mượt 0.6s
          card.style.transition = 'transform 0.1s ease-out, box-shadow 0.6s ease'; 
       });
-
 
       // 4. Subtle Particles (Cyber dust)
       const canvas = document.getElementById('particles');
