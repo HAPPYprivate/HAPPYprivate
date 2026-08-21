@@ -43,13 +43,17 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      
+      /* FIX 1: Cho phép cuộn trên mobile, chống trượt ngang */
+      overflow-x: hidden;
+      overflow-y: auto;
+      padding: 20px; /* Thêm khoảng cách an toàn 2 bên và trên dưới */
       perspective: 1000px;
     }
 
-    /* Ambient Background - Cyberpunk style */
+    /* FIX 2: Đổi absolute thành fixed để nền bao phủ toàn màn hình ngay cả khi cuộn */
     .ambient-bg {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: 0;
       background: 
@@ -65,9 +69,8 @@
       100% { transform: scale(1.1); opacity: 1; }
     }
 
-    /* Grid overlay for tech feel */
     .grid-overlay {
-      position: absolute;
+      position: fixed;
       inset: -50%;
       z-index: 1;
       background-image: 
@@ -90,7 +93,12 @@
     .glass-panel {
       position: relative;
       z-index: 10;
-      width: min(900px, 92%);
+      
+      /* FIX 3: Scale tốt hơn cho form */
+      width: 100%;
+      max-width: 900px;
+      margin: auto; /* Giúp căn giữa chuẩn xác khi kết hợp với flex */
+      
       padding: 48px;
       border-radius: var(--radius-lg);
       background: var(--glass-bg);
@@ -98,9 +106,6 @@
       -webkit-backdrop-filter: blur(16px) saturate(180%);
       border: 1px solid var(--glass-border);
       
-      /* FIX LỖI CHỚP VIỀN SÁNG: 
-         Phải có đủ 3 layer shadow giống như lúc hover, nhưng layer giữa để trong suốt (rgba 0) 
-         thì CSS mới hiểu để làm mượt transition */
       box-shadow: 
         0 8px 32px 0 rgba(0, 0, 0, 0.4),
         0 0 0px rgba(157, 78, 221, 0), 
@@ -121,27 +126,39 @@
       transform: rotateX(0) translateY(0) scale(1);
     }
 
-    /* Floating effect on hover */
     .glass-panel:hover {
-      /* Lúc hover cũng có đúng 3 layer shadow */
       box-shadow: 
         0 15px 40px 0 rgba(0, 0, 0, 0.5),
         0 0 50px rgba(157, 78, 221, 0.3), 
         inset 0 1px 0 rgba(255,255,255,0.15);
     }
 
+    /* FIX 4: Media Queries scale mượt cho Tablet và Mobile */
     @media (max-width: 850px) {
       .glass-panel { 
         grid-template-columns: 1fr; 
-        padding: 32px 24px;
+        padding: 40px 32px;
         gap: 32px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .glass-panel { 
+        padding: 32px 20px; /* Nhỏ hơn nữa cho mobile để không sát lề */
+        gap: 24px;
+      }
+      h1 {
+        font-size: clamp(2.5rem, 8vw, 3.5rem) !important; /* Scale chữ title trên mobile */
+      }
+      .btn-custom {
+        padding: 14px 20px;
+        font-size: 0.9rem;
       }
     }
 
     /* Left Side Content */
     .content-area { display: flex; flex-direction: column; gap: 16px; }
 
-    /* Badge */
     .badge {
       align-self: flex-start;
       font-family: 'JetBrains Mono', monospace;
@@ -157,7 +174,6 @@
       box-shadow: 0 0 10px rgba(157, 78, 221, 0.2);
     }
 
-    /* ANIMATION CHO TITLE */
     @keyframes gradientFlow {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -175,7 +191,6 @@
       position: relative;
     }
 
-    /* Pink Title */
     .text-glow-pink {
       color: transparent;
       background: linear-gradient(270deg, var(--neon-pink), #ff7eb3, var(--neon-purple), var(--neon-pink));
@@ -201,7 +216,6 @@
         z-index: -1;
     }
 
-    /* Cyan Title */
     .text-glow-cyan {
       color: transparent;
       background: linear-gradient(270deg, var(--neon-cyan), #72efdd, #00b4d8, var(--neon-cyan));
@@ -227,7 +241,6 @@
         z-index: -1;
     }
 
-    /* Subtitle */
     p.description {
       font-size: 1.05rem;
       line-height: 1.6;
@@ -365,8 +378,9 @@
     .cyber-toast.show { bottom: 40px; }
     .cyber-toast.error { border-left-color: #ff4d4d; box-shadow: 0 0 20px rgba(255, 77, 77, 0.1); }
     
+    /* FIX: Hạt particle cũng cần fixed để không trôi khi scroll */
     #particles {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: 2;
       pointer-events: none;
@@ -517,13 +531,12 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // 3. 3D Hover Effect - ĐÃ FIX LỖI LỆCH NÚT
+      // 3. 3D Hover Effect
       const card = document.getElementById('mainCard');
       
       card.addEventListener('mousemove', (e) => {
         if(window.innerWidth < 850) return; 
         
-        // Tính toán tọa độ chuột NGAY TRONG BẢN THÂN THẺ CARD (Fix triệt để lỗi lệch hitbox)
         const rect = card.getBoundingClientRect();
         const x = e.clientX - rect.left; 
         const y = e.clientY - rect.top;
@@ -531,7 +544,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         const centerX = rect.width / 2;
         const centerY = rect.height / 2;
         
-        // Tính góc nghiêng (giảm hệ số để đỡ bị quá gắt)
         const rotateX = ((y - centerY) / centerY) * -8;
         const rotateY = ((x - centerX) / centerX) * 8;
         
@@ -543,13 +555,11 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
       card.addEventListener('mouseleave', () => {
          if(card.classList.contains('revealed')) {
             card.style.transform = `rotateY(0deg) rotateX(0deg) scale3d(1, 1, 1)`;
-            // Khôi phục lại transition gốc của CSS
             card.style.transition = 'transform 0.5s ease-out, box-shadow 0.6s ease';
          }
       });
       
       card.addEventListener('mouseenter', () => {
-         // Để transform (3D) diễn ra nhanh, còn box-shadow (phát sáng) vẫn fade mượt 0.6s
          card.style.transition = 'transform 0.1s ease-out, box-shadow 0.6s ease'; 
       });
 
