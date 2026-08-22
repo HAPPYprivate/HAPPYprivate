@@ -33,17 +33,25 @@
       background-color: var(--bg-dark);
       color: var(--text-main);
       
-      /* SỬ DỤNG dvh để fix lỗi thanh URL trên Mobile, cho phép cuộn nếu màn hình quá lùn */
-      min-height: 100dvh; 
+      /* Cố định toàn màn hình, cấm mọi hành vi cuộn */
+      height: 100dvh; 
       width: 100vw;
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow: hidden; 
       
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 20px;
       perspective: 1000px;
+    }
+
+    /* Wrapper mới để đảm nhiệm việc scale (thu phóng) mà không làm loạn hiệu ứng 3D */
+    #scaleWrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      transform-origin: center center;
     }
 
     .ambient-bg {
@@ -87,10 +95,11 @@
     .glass-panel {
       position: relative;
       z-index: 10;
-      width: 100%;
+      width: 90vw; /* Chiếm 90% chiều rộng để luôn có khoảng trống 2 bên */
       max-width: 900px;
-      max-height: 90vh; /* Ngăn card tràn màn hình, tạo thanh cuộn bên trong nếu cần */
-      overflow-y: auto; /* Cho phép cuộn bên trong panel */
+      
+      /* Đã loại bỏ các thuộc tính cuộn (overflow, max-height) ở đây */
+      overflow: hidden; 
       
       padding: 48px;
       border-radius: var(--radius-lg);
@@ -113,11 +122,6 @@
       transform: rotateX(-10deg) translateY(40px) scale(0.95);
       transition: transform 0.5s ease-out, box-shadow 0.6s ease, opacity 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
-
-    /* Tùy chỉnh thanh cuộn cho mượt */
-    .glass-panel::-webkit-scrollbar { width: 6px; }
-    .glass-panel::-webkit-scrollbar-track { background: transparent; }
-    .glass-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
 
     .glass-panel.revealed {
       opacity: 1;
@@ -161,7 +165,7 @@
       line-height: 1.1;
       letter-spacing: -1px;
       display: flex;
-      flex-wrap: wrap; /* Sửa thành wrap để không tràn trên màn hình ngang hẹp */
+      flex-wrap: wrap;
       column-gap: 16px;
       position: relative;
     }
@@ -336,12 +340,9 @@
       position: fixed;
       bottom: 30px;
       left: 50%;
-      
-      /* Ẩn bằng transform và opacity thay vì tọa độ bottom để không bao giờ bị lọt khung */
       transform: translate(-50%, 150%);
       opacity: 0;
       visibility: hidden;
-      
       background: rgba(10, 10, 15, 0.95);
       border-left: 4px solid var(--neon-cyan);
       color: white;
@@ -358,7 +359,7 @@
       z-index: 999;
       backdrop-filter: blur(10px);
       width: max-content;
-      max-width: 90vw; /* Giới hạn chiều rộng trên Mobile */
+      max-width: 90vw;
     }
     
     .cyber-toast.show { 
@@ -381,10 +382,9 @@
         grid-template-columns: 1fr; 
         padding: 40px;
         gap: 30px;
-        max-height: none; /* Mobile không cần scroll nội bộ, scroll luôn cả body cho mượt */
       }
       .content-area {
-        align-items: center; /* Căn giữa nội dung trên Mobile */
+        align-items: center; 
         text-align: center;
       }
       .badge { align-self: center; }
@@ -393,7 +393,6 @@
     }
     
     @media (max-width: 480px) {
-      body { padding: 15px; }
       .glass-panel { 
         padding: 30px 20px;
         gap: 20px;
@@ -412,7 +411,6 @@
       .terminal-body { padding: 12px; font-size: 0.75rem; }
     }
 
-    /* Hỗ trợ riêng cho các màn hình điện thoại nằm ngang hoặc quá lùn */
     @media (max-height: 650px) {
       .glass-panel { padding: 24px 20px; gap: 16px; }
       h1 { font-size: 2rem !important; }
@@ -429,59 +427,62 @@
   <div class="grid-overlay"></div>
   <canvas id="particles"></canvas>
 
-  <!-- Main Content -->
-  <main class="glass-panel" id="mainCard">
-    
-    <!-- Left: Info -->
-    <section class="content-area">
-      <div class="badge">V0.8 // Active</div>
+  <!-- Scale Wrapper mới: Bao bọc bên ngoài card để phóng/thu nội dung -->
+  <div id="scaleWrapper">
+    <!-- Main Content -->
+    <main class="glass-panel" id="mainCard">
       
-      <h1>
-        <span class="text-glow-pink">HAPPY</span>
-        <span class="text-glow-cyan">script</span>
-      </h1>
-      
-      <p class="description">
-        Join the official HAPPY Script Discord server. Get the latest updates, feature announcements, and news. Report bugs, suggest improvements, share feedback, and connect with the developer and community.
-      </p>
-      
-      <div class="warning-text">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <span>PLEASE: Don't read the source code of the HAPPY script 😭</span>
-      </div>
-    </section>
-
-    <!-- Right: Actions & Code -->
-    <section class="action-area">
-      
-      <!-- Terminal Preview -->
-      <div class="terminal-window">
-        <div class="terminal-header">
-          <div class="dot dot-red"></div>
-          <div class="dot dot-yellow"></div>
-          <div class="dot dot-green"></div>
-          <div class="terminal-title">happyscript.lua</div>
-        </div>
-        <div class="terminal-body"><span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()</div>
-      </div>
-
-      <!-- Buttons -->
-      <div class="btn-group">
-        <button id="discordBtn" class="btn-custom btn-discord">
-          <i class="fa-brands fa-discord fa-lg"></i>
-          JOIN DISCORD
-        </button>
+      <!-- Left: Info -->
+      <section class="content-area">
+        <div class="badge">V0.8 // Active</div>
         
-        <button id="copyBtn" class="btn-custom btn-copy">
-          <i class="fa-solid fa-terminal"></i>
-          COPY SCRIPT
-        </button>
-      </div>
+        <h1>
+          <span class="text-glow-pink">HAPPY</span>
+          <span class="text-glow-cyan">script</span>
+        </h1>
+        
+        <p class="description">
+          Join the official HAPPY Script Discord server. Get the latest updates, feature announcements, and news. Report bugs, suggest improvements, share feedback, and connect with the developer and community.
+        </p>
+        
+        <div class="warning-text">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>PLEASE: Don't read the source code of the HAPPY script 😭</span>
+        </div>
+      </section>
 
-    </section>
-  </main>
+      <!-- Right: Actions & Code -->
+      <section class="action-area">
+        
+        <!-- Terminal Preview -->
+        <div class="terminal-window">
+          <div class="terminal-header">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+            <div class="terminal-title">happyscript.lua</div>
+          </div>
+          <div class="terminal-body"><span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()</div>
+        </div>
 
-  <!-- Toast (Fix lỗi lọt khung) -->
+        <!-- Buttons -->
+        <div class="btn-group">
+          <button id="discordBtn" class="btn-custom btn-discord">
+            <i class="fa-brands fa-discord fa-lg"></i>
+            JOIN DISCORD
+          </button>
+          
+          <button id="copyBtn" class="btn-custom btn-copy">
+            <i class="fa-solid fa-terminal"></i>
+            COPY SCRIPT
+          </button>
+        </div>
+
+      </section>
+    </main>
+  </div> <!-- Kết thúc Scale Wrapper -->
+
+  <!-- Toast -->
   <div id="toast" class="cyber-toast">
     <i class="fa-solid fa-check" id="toastIcon" style="color: var(--neon-cyan)"></i>
     <span id="toastText">Payload copied to clipboard.</span>
@@ -494,12 +495,40 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       
-      // 1. Reveal Animation
+      // HỆ THỐNG AUTOSCALE - LUÔN KHỚP VỚI MỌI MÀN HÌNH BẰNG TỶ LỆ
+      function fitToScreen() {
+        const wrapper = document.getElementById('scaleWrapper');
+        const card = document.getElementById('mainCard');
+        
+        // Đo lường kích thước gốc của layout card
+        const cardWidth = card.offsetWidth;
+        const cardHeight = card.offsetHeight;
+        
+        // Không gian khoảng cách tối thiểu cách mép màn hình mong muốn (Top/Bottom = 40px)
+        const verticalPadding = 40; 
+        
+        // Tính toán tỷ lệ dựa trên kích thước màn hình thực
+        const scaleX = window.innerWidth / cardWidth;
+        const scaleY = (window.innerHeight - verticalPadding) / cardHeight;
+        
+        // Chỉ thu nhỏ lại nếu vượt quá màn hình, không phóng to (Math.min(1, ...))
+        const scale = Math.min(1, scaleX, scaleY);
+        
+        // Áp dụng scale
+        wrapper.style.transform = `scale(${scale})`;
+      }
+
+      // Kích hoạt tính năng AutoScale ngay khi load và khi thay đổi size cửa sổ
+      fitToScreen();
+      window.addEventListener('resize', fitToScreen);
+
+      // Reveal Animation
       setTimeout(() => {
         document.getElementById('mainCard').classList.add('revealed');
+        fitToScreen(); // Tính toán lại tỷ lệ sau khi hiện hình ảnh để chắc chắn
       }, 300);
 
-      // 2. Button Logic
+      // Button Logic
       const DISCORD_URL = "https://discord.gg/Y5r4f4BYtm";
       const discordBtn = document.getElementById('discordBtn');
       const copyBtn = document.getElementById('copyBtn');
@@ -564,7 +593,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         }
       });
 
-      // 3. 3D Hover Effect
+      // 3D Hover Effect
       const card = document.getElementById('mainCard');
       
       card.addEventListener('mousemove', (e) => {
@@ -596,7 +625,7 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
          card.style.transition = 'transform 0.1s ease-out, box-shadow 0.6s ease'; 
       });
 
-      // 4. Subtle Particles (Cyber dust)
+      // Subtle Particles
       const canvas = document.getElementById('particles');
       const ctx = canvas.getContext('2d');
       let width, height;
@@ -647,7 +676,6 @@ loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()
         requestAnimationFrame(animate);
       }
       animate();
-
     });
   </script>
 </body>
