@@ -8,15 +8,15 @@ const [layout, script, midi, scriptTail, midiTail] = [
 ].map(rd);
 const scriptData = '<script id="scriptContent" type="text/plain">loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()</script>';
 const routes = {
-  '': {route:'script', canon:SITE, base:'', home:'./', scriptUrl:'./', midiUrl:'midi/',
+  '': {route:'script', canon:SITE, base:'', home:'./', scriptUrl:'./', midiUrl:'midi/', showLogo:true,
     title:'HAPPY Script — Roblox Script Service',
     desc:'HAPPY Script is a script service designed for use with Roblox exploits. Get service updates, report bugs, and share feedback.',
     sections:[script,scriptTail], scriptData},
-  'script/': {route:'script', canon:SITE, base:'../', home:'../', scriptUrl:'./', midiUrl:'../midi/',
+  'script/': {route:'script', canon:SITE, base:'../', home:'../', scriptUrl:'./', midiUrl:'../midi/', showLogo:true,
     title:'HAPPY Script — Roblox Script Service',
     desc:'HAPPY Script is a script service designed for use with Roblox exploits. Get service updates, report bugs, and share feedback.',
     sections:[script,scriptTail], scriptData},
-  'midi/': {route:'midi', canon:SITE+'midi/', base:'../', home:'../', scriptUrl:'../', midiUrl:'./',
+  'midi/': {route:'midi', canon:SITE+'midi/', base:'../', home:'../', scriptUrl:'../', midiUrl:'./', showLogo:false,
     title:'HAPPY Midi — Music Creation & MIDI Software',
     desc:'HAPPY Midi brings together Sheet Studio, Happy Macro, Generate, and Check Display for MIDI.',
     sections:[midi,midiTail], scriptData:''}
@@ -31,6 +31,7 @@ for (const [dir, route] of Object.entries(routes)) {
     + '<a href="'+route.midiUrl+'"'+(route.route === 'midi' ? ' aria-current="page"' : '')+'>HAPPY Midi</a>';
   const values = {
     '{{SECTIONS}}':sections,'{{NAV}}':nav,'{{SCRIPT_DATA}}':route.scriptData,
+    '{{BRAND_LOGO}}':route.showLogo ? '<div class="brand-area page-brand reveal"><img class="brand-logo" src="'+route.base+'logo.png" alt="HAPPY official logo" /></div>' : '',
     '{{TITLE}}':route.title,'{{DESC}}':route.desc,'{{CANON}}':route.canon,
     '{{SITE}}':SITE,'{{ROUTE}}':route.route,'{{HOME}}':route.home,'{{BASE}}':route.base,
     '{{SCRIPT_URL}}':route.scriptUrl,'{{MIDI_URL}}':route.midiUrl
