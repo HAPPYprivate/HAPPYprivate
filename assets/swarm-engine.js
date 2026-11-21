@@ -230,6 +230,11 @@
     return s;
   }
 
+  // [fix] gradient text (background-clip:text + transparent fill). The engine used to split it
+  // into an empty gradient box plus a transparent text layer, so the real glyphs never showed.
+  const clipsText = (cs) =>
+    (cs.webkitBackgroundClip === "text" || cs.backgroundClip === "text") && cs.backgroundImage && cs.backgroundImage !== "none";
+
   const lhPx = (cs) => {
     const v = parseFloat(cs.lineHeight);
     return isNaN(v) ? (parseFloat(cs.fontSize) || 16) * 1.2 : v;
@@ -625,7 +630,14 @@
 
     function emitLeaf(el, cs, r, ctx, key) {
       const root = document.createElement("div");
-      root.setAttribute("style", rootStyle(cs, false));
+      root.setAttribute(
+        "style",
+        rootStyle(cs, false) +
+          (clipsText(cs)
+            ? styleString(cs, ["background-image", "background-size", "background-position", "background-repeat", "background-origin"]) +
+              "background-clip:text;-webkit-background-clip:text;"
+            : "")
+      );
       const clone = inert().importNode(el, true);
       cloneDescendantsStyled(el, clone);
       while (clone.firstChild) root.appendChild(clone.firstChild);
@@ -851,9 +863,9 @@
         const m = document.createElement("img");
         m.src = src;
         m.decoding = "async";
-        m.setAttribute("style", fit + "display:block;");
+        m.setAttribute("style", fit + "display:block;" + (cs.filter && cs.filter !== "none" ? `filter:${cs.filter};` : ""));
         m.draggable = false;
-        return { el: m, sig: src };
+        return { el: m, sig: src + (cs.filter !== "none" ? cs.filter : "") };
       }
       if (tag === "svg") {
         const m = cloneStyled(el);
@@ -961,6 +973,7 @@
         frame: styleString(cs, ["border-top-width", "border-right-width", "border-bottom-width", "border-left-width", "border-top-style", "border-right-style", "border-bottom-style", "border-left-style", "border-top-color", "border-right-color", "border-bottom-color", "border-left-color"]),
         radius: cs.borderRadius,
         shadow: cs.boxShadow !== "none" ? cs.boxShadow : "",
+        glow: /drop-shadow/.test(scs.filter || ""),
         bg: alphaOf(cs.backgroundColor) > 0.01 ? cs.backgroundColor : "",
         draw: null,
         styled: false,
@@ -1116,7 +1129,9 @@
       }
 
       let boxItem = ctx.boxItem;
-      if (emit) {
+      // [fix] gradient-clipped text is drawn by its text layer, so it gets no separate gradient box
+      const gradientText = clipsText(cs) && allInline(el) && /\S/.test(el.textContent);
+      if (emit && !gradientText) {
         const b = emitBox(el, cs, r, { ...ctx, layer, clip, op }, keyFn(), false);
         if (b) boxItem = b;
       }
@@ -1496,7 +1511,7 @@
 .bg.on{opacity:1}
 .layer,.port{position:absolute;overflow:hidden;pointer-events:none}
 .layer{inset:0}
-.world{position:absolute;left:0;top:0;will-change:transform}
+.world{position:absolute;left:0;top:0}
 .it{position:absolute;left:0;top:0;transform-origin:0 0}
 .it.settle{transition:transform .3s cubic-bezier(.2,.8,.2,1)}
 .r{background-color:var(--ph,#D9D9D9);transition:background-color .22s ease,border-radius .22s ease}
@@ -1507,8 +1522,10 @@
 .m>.ph{position:absolute;left:50%;top:50%;width:22px;height:22px;transform:translate(-50%,-50%);opacity:.7;transition:opacity .2s}
 .m>.md{position:absolute;inset:0;width:100%;height:100%;opacity:0;clip-path:inset(0 0 100% 0);transition:opacity .35s ease,clip-path .6s cubic-bezier(.2,.75,.2,1)}
 .m.st{background-color:transparent;transition:background-color .3s ease .3s}
+.m.glow{overflow:visible}
 .m.st>.ph{opacity:0}
 .m.st>.md{opacity:1;clip-path:inset(0 0 0 0)}
+.m.glow.st>.md{clip-path:inset(-60px)}
 .m>.md.swap{animation:swap .45s ease}
 @keyframes swap{from{opacity:0;filter:blur(6px)}}
 .m>.fr{position:absolute;inset:0;pointer-events:none}
@@ -1737,7 +1754,9 @@
 
     syncWorld() {
       const vp = this.vp;
-      this.world.style.transform = `translate(${-vp.sx}px,${-vp.sy}px)`;
+      const dpr = window.devicePixelRatio || 1;
+      const snap = (v) => Math.round(v * dpr) / dpr;
+      this.world.style.transform = `translate(${-snap(vp.sx)}px,${-snap(vp.sy)}px)`;
     }
 
     mount(model) {
@@ -1891,6 +1910,7 @@
           }
         }
         n.classList.toggle("st", !!it.styled);
+        n.classList.toggle("glow", !!it.glow);
         n.style.borderRadius = it.styled ? src.radius : "0px";
         n.style.boxShadow = it.styled ? src.shadow : "";
         n.style.backgroundColor = it.styled && src.bg ? src.bg : "";
@@ -3532,12 +3552,8 @@
       mark("scan");
       if (this.dead) return;
       try {
-        // Wait for web fonts to settle. A late font swap changes text widths and
-        // causes the live DOM to shift after the Swarm canvas has been removed.
-        await Promise.race([document.fonts ? document.fonts.ready : Promise.resolve(), sleep(4500)]);
+        await Promise.race([document.fonts.ready, sleep(1200)]);
       } catch (_) {}
-      await nextFrame();
-      await nextFrame();
       mark("fonts");
       this.view.measure();
       const shot = await shotP;
@@ -3791,26 +3807,16 @@
       document.documentElement.removeAttribute("data-swarm-building");
       emit("portfolio:swarm-end");
       unhidePage();
-
       if (this.sfx) {
         if (reveal) this.sfx.release();
         this.sfx.close(reveal ? 1.4 : 0.25);
       }
-
-      const root = document.documentElement;
       const finish = () => {
         this.dead = true;
         cancelAnimationFrame(this.raf);
         for (const u of this.unbinds || []) u();
         this.view.host.remove();
-
-        // Resume the real page only after the simulation layer has gone.
-        // This keeps geometry, fonts and animated transforms aligned during release.
-        root.removeAttribute("data-swarm-freeze");
-        if (reveal) root.setAttribute("data-swarm-revealed", "true");
-        else root.removeAttribute("data-swarm-revealed");
       };
-
       if (reveal) {
         this.engine.releasing = true;
         this.engine.flocking = true;
@@ -3818,22 +3824,18 @@
           c.gen = null;
           c.follow = false;
         }
-
         this.view.hud.classList.remove("on");
-
-        // A shorter, cleaner crossfade reduces the double-image / blur effect.
-        this.view.host.style.setProperty("transition", "opacity .34s ease-out", "important");
         setTimeout(() => {
           this.view.host.style.setProperty("opacity", "0", "important");
-        }, 260);
-        setTimeout(finish, 650);
+        }, 450);
+        setTimeout(finish, 1150);
       } else {
-        this.view.host.style.setProperty("transition", "opacity .18s ease-out", "important");
+        this.view.host.style.setProperty("transition", "opacity .25s ease", "important");
         this.view.host.style.setProperty("opacity", "0", "important");
         this.dead = true;
         cancelAnimationFrame(this.raf);
         for (const u of this.unbinds || []) u();
-        setTimeout(finish, 200);
+        setTimeout(() => this.view.host.remove(), 260);
       }
     }
   }
@@ -3862,27 +3864,7 @@
     document.documentElement.setAttribute("data-swarm-building", "true");
     emit("portfolio:swarm-start");
     app = new App();
-    app.run().catch((err) => {
-      console.error("[swarm-rebuild]", err);
-      const failed = app;
-      app = null;
-
-      if (failed) {
-        try {
-          if (failed.sfx) failed.sfx.close(0.1);
-          if (failed.raf) cancelAnimationFrame(failed.raf);
-          for (const unbind of failed.unbinds || []) unbind();
-          if (failed.view && failed.view.host) failed.view.host.remove();
-        } catch (_) {}
-      }
-
-      const root = document.documentElement;
-      root.removeAttribute("data-swarm-init");
-      root.removeAttribute("data-swarm-building");
-      root.removeAttribute("data-swarm-freeze");
-      root.removeAttribute("data-swarm-revealed");
-      emit("portfolio:swarm-end");
-    });
+    app.run().catch((err) => console.error("[swarm-rebuild]", err));
   }
 
   function stop(reveal) {
@@ -3906,8 +3888,6 @@
     if (a.sfx) a.sfx.close(0.1);
     document.documentElement.removeAttribute("data-swarm-init");
     document.documentElement.removeAttribute("data-swarm-building");
-    document.documentElement.removeAttribute("data-swarm-freeze");
-    document.documentElement.removeAttribute("data-swarm-revealed");
     emit("portfolio:swarm-end");
   }
 
