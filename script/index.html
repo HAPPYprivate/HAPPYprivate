@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en" class="antialiased">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#020005" />
+  <title>HAPPY Script — Roblox Script Service</title>
+  <meta name="description" content="HAPPY Script is a script service designed for use with Roblox exploits. Get service updates, report bugs, and share feedback." />
+  <link rel="canonical" href="https://happyprivate.github.io/HAPPYprivate/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="HAPPY Script — Roblox Script Service" />
+  <meta property="og:description" content="HAPPY Script is a script service designed for use with Roblox exploits. Get service updates, report bugs, and share feedback." />
+  <meta property="og:url" content="https://happyprivate.github.io/HAPPYprivate/" />
+  <meta property="og:image" content="https://happyprivate.github.io/HAPPYprivate/logo.png" />
+  <meta name="twitter:card" content="summary" />
+
+  <style id="swarm-first-paint-style">
+    :root { --swarm-cover-bg: #020005; }
+    html[data-swarm-init="true"]::before { content: ""; position: fixed; inset: 0; z-index: 2147483640; background: var(--swarm-cover-bg, #020005); }
+  </style>
+  <script id="swarm-first-paint-init">
+    (() => {
+      try {
+        const builtPaths = JSON.parse(sessionStorage.getItem("portfolio-built-paths-v1") || "[]");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const alreadyBuilt = Array.isArray(builtPaths) && builtPaths.includes(window.location.pathname);
+        if (!reducedMotion && !alreadyBuilt) {
+          document.documentElement.setAttribute("data-swarm-init", "true");
+          document.documentElement.setAttribute("data-swarm-building", "true");
+          document.documentElement.setAttribute("data-swarm-run", "true");
+        }
+      } catch (error) { /* storage unavailable: leave the normal page visible */ }
+    })();
+  </script>
+  <link rel="preload" href="../assets/swarm-engine.js" as="script" />
+  <link rel="icon" href="../logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" />
+  <link rel="stylesheet" href="../assets/site.css" />
+</head>
+<body data-route="script">
+  <div class="ambient-bg" aria-hidden="true"></div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <header class="nav">
+    <div class="wrap nav-in">
+      <a class="nav-brand" href="../" aria-label="HAPPY home"><img src="../logo.png" alt="" width="32" height="32" /><span>HAPPY</span></a>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
+      <nav class="nav-links" id="navLinks" aria-label="Main">
+        <a href="./" aria-current="page">HAPPY Script</a><a href="../midi/">HAPPY Midi</a>
+        <a href="#faq">FAQ</a>
+        <a href="#community">Community</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="brand-area page-brand reveal"><img class="brand-logo" src="../logo.png" alt="HAPPY official logo" /></div>
+    <section class="sec sec-first sec-script" id="script" aria-labelledby="scriptTitle">
+      <div class="wrap">
+        <div class="glass-panel reveal" id="mainCard">
+          <div class="content-area">
+            <div class="badge"><span class="badge-dot" aria-hidden="true"></span>V0.8 <span aria-hidden="true">//</span> Active</div>
+            <h1 id="scriptTitle" class="big-title"><span class="text-glow-pink" data-text="HAPPY">HAPPY</span> <span class="text-glow-cyan" data-text="script">script</span></h1>
+            <p class="description">Free Roblox scripts by an independent developer. Join our Discord community for project updates, release announcements, support, and discussions. Report issues, suggest improvements, and share your feedback directly with the developer.</p>
+            <div class="warning-text"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>PLEASE: Don't inspect the source code of the HAPPY script 😭</span></div>
+          </div>
+          <div class="action-area">
+            <div class="terminal-window">
+              <div class="terminal-header"><span class="dot dot-red" aria-hidden="true"></span><span class="dot dot-yellow" aria-hidden="true"></span><span class="dot dot-green" aria-hidden="true"></span><span class="terminal-title">happyscript.lua</span></div>
+              <div class="terminal-body"><span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()</div>
+            </div>
+            <p class="terminal-caption">Copy the command above to use the latest HAPPY Script loader.</p>
+            <div class="btn-group">
+              <button id="discordBtn" class="btn-custom btn-discord" type="button"><i class="fa-brands fa-discord fa-lg" aria-hidden="true"></i><span>Join Discord</span></button>
+              <button id="copyBtn" class="btn-custom btn-copy" type="button"><i class="fa-solid fa-terminal" aria-hidden="true"></i><span>Copy Script</span></button>
+            </div>
+          </div>
+        </div>
+        <div class="pill-row reveal"><span><i class="fa-solid fa-gift" aria-hidden="true"></i> Free</span><span><i class="fa-solid fa-copy" aria-hidden="true"></i> One-click copy</span><span><i class="fa-brands fa-discord" aria-hidden="true"></i> Community support</span></div>
+      </div>
+    </section>
+
+    <section class="sec sec-faq" id="faq" aria-labelledby="faqTitle">
+      <div class="wrap narrow">
+        <div class="sec-head reveal"><h2 id="faqTitle">HAPPY Script FAQ</h2></div>
+        <div class="faq reveal">
+          <details><summary>What is HAPPY Script?</summary><p>HAPPY Script is a script service designed for use with Roblox exploits. It allows users to execute programs developed and supported by the service.</p></details>
+          <details><summary>Is HAPPY Script reliable?</summary><p>HAPPY Script was developed out of passion and is designed to be highly reliable. It contains no malicious code, monetization schemes, or advertisements.</p></details>
+          <details><summary>Are there any risks involved in using HAPPY Script?</summary><p>Yes. There is always a risk to your Roblox account when using any exploit or script for Roblox. Understand and accept that risk before using one.</p></details>
+        </div>
+      </div>
+    </section>
+    <section class="sec sec-community" id="community" aria-labelledby="comTitle">
+      <div class="wrap narrow center reveal">
+        <h2 id="comTitle">HAPPY Script community</h2>
+        <p class="description">Follow the latest HAPPY Script news, update logs, and feature announcements. Report bugs, suggest improvements, share feedback, and connect directly with the developer and community.</p>
+        <button class="btn-custom btn-discord" type="button" data-discord><i class="fa-brands fa-discord fa-lg" aria-hidden="true"></i><span>Join Discord</span></button>
+      </div>
+    </section>
+    <footer class="foot"><div class="wrap"><span>© HAPPY — independent developer</span><span class="foot-links"><a href="./">HAPPY Script</a><a href="../midi/">HAPPY Midi</a></span></div></footer>
+
+  </main>
+
+  <div id="toast" class="cyber-toast" role="status" aria-live="polite" aria-atomic="true">
+    <i class="fa-solid fa-check" id="toastIcon" style="color: var(--neon-cyan)" aria-hidden="true"></i>
+    <span id="toastText">Script copied to clipboard.</span>
+  </div>
+
+  <script id="scriptContent" type="text/plain">loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()</script>
+  <script src="../assets/site-config.js"></script>
+  <script src="../assets/site.js" defer></script>
+
+  <!-- Swarm cursor animation. Path is resolved from the page's base so it works on /, /script/, and /midi/. -->
+  <script id="swarm-engine-loader">
+    (() => {
+      "use strict";
+      const root = document.documentElement;
+      if (root.getAttribute("data-swarm-init") !== "true") return;
+      window.__swarmConfig = Object.freeze({ minAgents: 4, maxAgents: 20, introAgents: 10, flockAgents: 12, idleRetireMs: 1800, scrollBoostStep: 160, scrollBoostMax: 4 });
+      window.__swarmModels = [
+        { name: "HAPPY Core", color: "#9d4edd" }, { name: "HAPPY Script", color: "#ff2a85" },
+        { name: "HAPPY Midi", color: "#7c5cff" }, { name: "GPT", color: "#00f5d4" },
+        { name: "Claude", color: "#bd5cff" }, { name: "Gemini", color: "#00b4d8" }
+      ];
+      let failsafe = 0;
+      function releaseCover() {
+        window.clearTimeout(failsafe);
+        root.removeAttribute("data-swarm-init");
+        root.removeAttribute("data-swarm-building");
+      }
+      failsafe = window.setTimeout(() => {
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+        const swarm = window.__swarmRebuild;
+        if (swarm?.app && typeof swarm.stop === "function") { try { swarm.stop(false); } catch (e) { console.error("[HAPPY] Could not stop Swarm:", e); } }
+        console.warn("[HAPPY] Swarm startup timed out; showing the original page.");
+        releaseCover();
+      }, 12000);
+      async function loadSwarm() {
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+        try { await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]); } catch (e) {}
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+        const engine = document.createElement("script");
+        engine.src = new URL("../assets/swarm-engine.js", document.baseURI).href;
+        engine.async = true;
+        engine.onload = () => {
+          if (root.getAttribute("data-swarm-init") !== "true") return;
+          const swarm = window.__swarmRebuild;
+          if (swarm && typeof swarm.start === "function") {
+            try { swarm.start(); } catch (e) { console.error("[HAPPY] Swarm startup failed:", e); releaseCover(); }
+          } else { console.error("[HAPPY] Swarm engine loaded, but start() was not found."); releaseCover(); }
+        };
+        engine.onerror = () => { console.error("[HAPPY] Could not load assets/swarm-engine.js."); releaseCover(); };
+        document.head.appendChild(engine);
+      }
+      if (document.readyState === "complete") loadSwarm(); else window.addEventListener("load", loadSwarm, { once: true });
+    })();
+  </script>
+</body>
+</html>

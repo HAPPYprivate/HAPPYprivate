@@ -58,6 +58,7 @@
   </header>
 
   <main>
+    <div class="brand-area page-brand reveal"><img class="brand-logo" src="{{BASE}}logo.png" alt="HAPPY official logo" /></div>
 {{SECTIONS}}
   </main>
 
@@ -66,11 +67,11 @@
     <span id="toastText">Script copied to clipboard.</span>
   </div>
 
-  <script id="scriptContent" type="text/plain">loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()</script>
+  {{SCRIPT_DATA}}
   <script src="{{BASE}}assets/site-config.js"></script>
   <script src="{{BASE}}assets/site.js" defer></script>
 
-  <!-- Swarm cursor animation. Path is resolved from the page's base so it works on / and /midi/. -->
+  <!-- Swarm cursor animation. Path is resolved from the page's base so it works on /, /script/, and /midi/. -->
   <script id="swarm-engine-loader">
     (() => {
       "use strict";

@@ -35,26 +35,28 @@
     return true;
   }
   const copyBtn = $('copyBtn');
-  let copyTimer;
-  copyBtn.addEventListener('click', async () => {
-    const label = copyBtn.querySelector('span'), icon = copyBtn.querySelector('i');
-    copyBtn.disabled = true;
-    try {
-      await copyText($('scriptContent').textContent.trim());
-      showToast('Script copied to clipboard.');
-      label.textContent = 'Copied!'; icon.className = 'fa-solid fa-check';
-      copyBtn.style.background = 'rgba(0, 245, 212, 0.1)';
-    } catch (e) {
-      console.error('Unable to copy script:', e);
-      showToast('Unable to copy. Please select the command and copy it manually.', true);
-    } finally {
-      clearTimeout(copyTimer);
-      copyTimer = setTimeout(() => {
-        label.textContent = 'Copy Script'; icon.className = 'fa-solid fa-terminal';
-        copyBtn.style.background = ''; copyBtn.disabled = false;
-      }, 1800);
-    }
-  });
+  if (copyBtn) {
+    let copyTimer;
+    copyBtn.addEventListener('click', async () => {
+      const label = copyBtn.querySelector('span'), icon = copyBtn.querySelector('i');
+      copyBtn.disabled = true;
+      try {
+        await copyText($('scriptContent').textContent.trim());
+        showToast('Script copied to clipboard.');
+        label.textContent = 'Copied!'; icon.className = 'fa-solid fa-check';
+        copyBtn.style.background = 'rgba(0, 245, 212, 0.1)';
+      } catch (e) {
+        console.error('Unable to copy script:', e);
+        showToast('Unable to copy. Please select the command and copy it manually.', true);
+      } finally {
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => {
+          label.textContent = 'Copy Script'; icon.className = 'fa-solid fa-terminal';
+          copyBtn.style.background = ''; copyBtn.disabled = false;
+        }, 1800);
+      }
+    });
+  }
 
   // Product CTAs: real link only when configured with a valid https URL; otherwise stay "Coming soon".
   document.querySelectorAll('[data-cta]').forEach((el) => {

@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#020005" />
   <title>HAPPY Midi — Music Creation & MIDI Software</title>
-  <meta name="description" content="HAPPY Midi: Sheet Studio, Happy Macro, Generate and Check Display for MIDI. Create, edit and play music in games with a piano system." />
+  <meta name="description" content="HAPPY Midi brings together Sheet Studio, Happy Macro, Generate, and Check Display for MIDI." />
   <link rel="canonical" href="https://happyprivate.github.io/HAPPYprivate/midi/" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="HAPPY Midi — Music Creation & MIDI Software" />
-  <meta property="og:description" content="HAPPY Midi: Sheet Studio, Happy Macro, Generate and Check Display for MIDI. Create, edit and play music in games with a piano system." />
+  <meta property="og:description" content="HAPPY Midi brings together Sheet Studio, Happy Macro, Generate, and Check Display for MIDI." />
   <meta property="og:url" content="https://happyprivate.github.io/HAPPYprivate/midi/" />
   <meta property="og:image" content="https://happyprivate.github.io/HAPPYprivate/logo.png" />
   <meta name="twitter:card" content="summary" />
@@ -50,7 +50,7 @@
       <a class="nav-brand" href="../" aria-label="HAPPY home"><img src="../logo.png" alt="" width="32" height="32" /><span>HAPPY</span></a>
       <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Menu"><i class="fa-solid fa-bars" aria-hidden="true"></i></button>
       <nav class="nav-links" id="navLinks" aria-label="Main">
-        <a href="#midi">Midi</a><a href="#script">Script</a>
+        <a href="../">HAPPY Script</a><a href="./" aria-current="page">HAPPY Midi</a>
         <a href="#faq">FAQ</a>
         <a href="#community">Community</a>
       </nav>
@@ -58,6 +58,7 @@
   </header>
 
   <main>
+    <div class="brand-area page-brand reveal"><img class="brand-logo" src="../logo.png" alt="HAPPY official logo" /></div>
     <section class="sec sec-first sec-midi" id="midi" aria-labelledby="midiTitle">
       <div class="wrap">
         <div class="midi-hero reveal">
@@ -143,53 +144,26 @@
       </div>
     </section>
 
-    <section class="sec sec-script" id="script" aria-labelledby="scriptTitle">
-      <div class="wrap">
-        <div class="brand-area reveal"><img class="brand-logo" src="../logo.png" alt="HAPPY Script official logo" /></div>
-        <div class="glass-panel reveal" id="mainCard">
-          <div class="content-area">
-            <div class="badge"><span class="badge-dot" aria-hidden="true"></span>V0.8 <span aria-hidden="true">//</span> Active</div>
-            <h2 id="scriptTitle" class="big-title"><span class="text-glow-pink" data-text="HAPPY">HAPPY</span> <span class="text-glow-cyan" data-text="script">script</span></h2>
-            <p class="description">Free Roblox scripts by an independent developer. Join our Discord community for project updates, release announcements, support, and discussions. Report issues, suggest improvements, and share your feedback directly with the developer.</p>
-            <div class="warning-text"><i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i><span>PLEASE: Don't inspect the source code of the HAPPY script 😭</span></div>
-          </div>
-          <div class="action-area">
-            <div class="terminal-window">
-              <div class="terminal-header"><span class="dot dot-red" aria-hidden="true"></span><span class="dot dot-yellow" aria-hidden="true"></span><span class="dot dot-green" aria-hidden="true"></span><span class="terminal-title">happyscript.lua</span></div>
-              <div class="terminal-body"><span class="function">loadstring</span>(<span class="keyword">game</span>:HttpGet(<span class="string">"https://happyscript.happy37135535.workers.dev/"</span>))()</div>
-            </div>
-            <p class="terminal-caption">Copy the command above to use the latest HAPPY Script loader.</p>
-            <div class="btn-group">
-              <button id="discordBtn" class="btn-custom btn-discord" type="button"><i class="fa-brands fa-discord fa-lg" aria-hidden="true"></i><span>Join Discord</span></button>
-              <button id="copyBtn" class="btn-custom btn-copy" type="button"><i class="fa-solid fa-terminal" aria-hidden="true"></i><span>Copy Script</span></button>
-            </div>
-          </div>
-        </div>
-        <div class="pill-row reveal"><span><i class="fa-solid fa-gift" aria-hidden="true"></i> Free</span><span><i class="fa-solid fa-copy" aria-hidden="true"></i> One-click copy</span><span><i class="fa-brands fa-discord" aria-hidden="true"></i> Community support</span></div>
-      </div>
-    </section>
-
     <section class="sec sec-faq" id="faq" aria-labelledby="faqTitle">
       <div class="wrap narrow">
-        <div class="sec-head reveal"><h2 id="faqTitle">FAQ</h2></div>
+        <div class="sec-head reveal"><h2 id="faqTitle">HAPPY Midi FAQ</h2></div>
         <div class="faq reveal">
-          <details><summary>Is HAPPY Script free?</summary><p>Yes. HAPPY Script is free. Use Copy Script to get the loader.</p></details>
           <details><summary>Which HAPPY Midi tools are free?</summary><p>Generate is free. Sheet Studio and Check Display for MIDI are paid software.</p></details>
-          <details><summary>What is a .happy file?</summary><p>A format built for Happy Macro. Sheet Studio is the official tool for exporting complete <code>.happy</code> files, so a plain MIDI file will not use all of Happy Macro.</p></details>
-          <details><summary>Is Generate or Check Display 100% accurate?</summary><p>No. Both depend on source quality and settings. Expect to review and edit results, ideally in Sheet Studio.</p></details>
-          <details><summary>Is Macro Gamer part of HAPPY Midi?</summary><p>No. Macro Gamer is an independent program by another developer. Generate can export <code>.mgp</code> files for it, with no official partnership.</p></details>
-          <details><summary>How do I buy software?</summary><p>Purchase buttons open an external page. Buttons without a link are marked Coming soon.</p></details>
+          <details><summary>What is a .happy file?</summary><p>A <code>.happy</code> file is a format built for Happy Macro. Sheet Studio is the official tool for exporting complete <code>.happy</code> files; a standard MIDI file is not automatically a <code>.happy</code> file.</p></details>
+          <details><summary>Are Generate and Check Display for MIDI 100% accurate?</summary><p>No. Results depend on source quality, audio or video clarity, and the detection settings you choose. Review and edit the results in Sheet Studio when needed.</p></details>
+          <details><summary>Is Macro Gamer part of HAPPY Midi?</summary><p>No. Macro Gamer is an independent program by another developer. Generate can export <code>.mgp</code> files for it, but there is no official partnership.</p></details>
+          <details><summary>How do I buy or download HAPPY Midi tools?</summary><p>Use a product button when it has an active link. Buttons marked Coming soon do not have an active purchase or download link yet.</p></details>
         </div>
       </div>
     </section>
     <section class="sec sec-community" id="community" aria-labelledby="comTitle">
       <div class="wrap narrow center reveal">
-        <h2 id="comTitle">Community &amp; support</h2>
-        <p class="description">Updates, support and feedback happen on Discord.</p>
+        <h2 id="comTitle">HAPPY Midi community</h2>
+        <p class="description">Join the HAPPY Midi Discord community for product updates, questions, support, and feedback about the MIDI tools.</p>
         <button class="btn-custom btn-discord" type="button" data-discord><i class="fa-brands fa-discord fa-lg" aria-hidden="true"></i><span>Join Discord</span></button>
       </div>
     </section>
-    <footer class="foot"><div class="wrap"><span>© HAPPY — independent developer</span><span class="foot-links"><a href="../">HAPPY Script</a><a href="../midi/">HAPPY Midi</a></span></div></footer>
+    <footer class="foot"><div class="wrap"><span>© HAPPY — independent developer</span><span class="foot-links"><a href="../">HAPPY Script</a><a href="./">HAPPY Midi</a></span></div></footer>
 
   </main>
 
@@ -198,11 +172,11 @@
     <span id="toastText">Script copied to clipboard.</span>
   </div>
 
-  <script id="scriptContent" type="text/plain">loadstring(game:HttpGet("https://happyscript.happy37135535.workers.dev/"))()</script>
+  
   <script src="../assets/site-config.js"></script>
   <script src="../assets/site.js" defer></script>
 
-  <!-- Swarm cursor animation. Path is resolved from the page's base so it works on / and /midi/. -->
+  <!-- Swarm cursor animation. Path is resolved from the page's base so it works on /, /script/, and /midi/. -->
   <script id="swarm-engine-loader">
     (() => {
       "use strict";

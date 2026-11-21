@@ -159,3 +159,9 @@ html[data-swarm-building] *,html[data-swarm-building] *::before,html[data-swarm-
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .js .reveal:not(.in){opacity:1;transform:none}
 }
+
+
+/* Shared product navigation and centered logo on every page */
+.nav-links a[aria-current="page"]{color:#fff;background:rgba(157,78,221,.16);border:1px solid rgba(157,78,221,.3)}
+.page-brand{padding-top:26px;margin-bottom:-20px}
+@media (max-width:480px){.page-brand{padding-top:18px;margin-bottom:-12px}}
