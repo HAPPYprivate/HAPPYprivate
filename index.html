@@ -825,6 +825,18 @@
       const root = document.documentElement;
       if (root.getAttribute("data-swarm-init") !== "true") return;
 
+      // Agent budget: smaller intro, adaptive worker count, and a compact final flock.
+      // These values are validated and clamped again by swarm-engine.js.
+      window.__swarmConfig = Object.freeze({
+        minAgents: 4,
+        maxAgents: 20,
+        introAgents: 10,
+        flockAgents: 12,
+        idleRetireMs: 1800,
+        scrollBoostStep: 160,
+        scrollBoostMax: 4
+      });
+
       // Match the HAPPY Script neon palette and brand identity.
       window.__swarmModels = [
         { name: "HAPPY Core", color: "#9d4edd" },
@@ -835,15 +847,25 @@
         { name: "DeepSeek", color: "#e879f9" }
       ];
 
+      let failsafe = 0;
       function releaseCover() {
+        window.clearTimeout(failsafe);
         root.removeAttribute("data-swarm-init");
         root.removeAttribute("data-swarm-building");
       }
 
-      // Never leave the visitor on a blank page if the network is slow.
-      const FAILSAFE_MS = 8000;
-      const failsafe = window.setTimeout(() => {
-        if (root.getAttribute("data-swarm-init") === "true" && !window.__swarmRebuild?.app) releaseCover();
+      // If startup stalls, stop the overlay and reveal the normal page.
+      const FAILSAFE_MS = 12000;
+      failsafe = window.setTimeout(() => {
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+        const swarm = window.__swarmRebuild;
+        if (swarm?.app && typeof swarm.stop === "function") {
+          try { swarm.stop(false); } catch (error) {
+            console.error("[HAPPY Script] Could not stop stalled Swarm animation:", error);
+          }
+        }
+        console.warn("[HAPPY Script] Swarm startup timed out; showing the original page.");
+        releaseCover();
       }, FAILSAFE_MS);
 
       async function loadSwarm() {
@@ -861,11 +883,15 @@
         engine.async = true;
 
         engine.onload = () => {
-          window.clearTimeout(failsafe);
           if (root.getAttribute("data-swarm-init") !== "true") return; // failsafe already released the page
           const swarm = window.__swarmRebuild;
           if (swarm && typeof swarm.start === "function") {
-            swarm.start();
+            try {
+              swarm.start();
+            } catch (error) {
+              console.error("[HAPPY Script] Swarm startup failed:", error);
+              releaseCover();
+            }
           } else {
             console.error("[HAPPY Script] Swarm engine loaded, but its start() API was not found.");
             releaseCover();
