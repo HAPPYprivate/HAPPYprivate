@@ -6,6 +6,34 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#020005" />
   <meta name="description" content="The official HAPPY Script page. Find project updates, join the community, and access the script." />
+
+  <!-- Swarm first-paint cover: keeps the page hidden until the cursor build canvas is ready. -->
+  <style id="swarm-first-paint-style">
+    :root { --swarm-cover-bg: #020005; }
+    html[data-swarm-init="true"]::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 2147483640;
+      background: var(--swarm-cover-bg, #020005);
+    }
+  </style>
+  <script id="swarm-first-paint-init">
+    (() => {
+      try {
+        const builtPaths = JSON.parse(sessionStorage.getItem("portfolio-built-paths-v1") || "[]");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const alreadyBuilt = Array.isArray(builtPaths) && builtPaths.includes(window.location.pathname);
+
+        if (!reducedMotion && !alreadyBuilt) {
+          document.documentElement.setAttribute("data-swarm-init", "true");
+          document.documentElement.setAttribute("data-swarm-building", "true");
+        }
+      } catch (error) {
+        // If browser storage is unavailable, leave the normal page visible.
+      }
+    })();
+  </script>
   <title>HAPPY script</title>
   <link rel="icon" href="logo.png" type="image/png" />
 
@@ -767,6 +795,62 @@
         }
       });
     });
+  </script>
+  <!-- Swarm cursor animation. The engine file must exist at assets/swarm-engine.js. -->
+  <script id="swarm-engine-loader">
+    (() => {
+      "use strict";
+
+      const root = document.documentElement;
+      if (root.getAttribute("data-swarm-init") !== "true") return;
+
+      // Match the HAPPY Script neon palette and brand identity.
+      window.__swarmModels = [
+        { name: "HAPPY Core", color: "#9d4edd" },
+        { name: "HAPPY Script", color: "#ff2a85" },
+        { name: "GPT", color: "#00f5d4" },
+        { name: "Claude", color: "#bd5cff" },
+        { name: "Gemini", color: "#00b4d8" },
+        { name: "DeepSeek", color: "#e879f9" }
+      ];
+
+      function releaseCover() {
+        root.removeAttribute("data-swarm-init");
+        root.removeAttribute("data-swarm-building");
+      }
+
+      function loadSwarm() {
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+
+        const engine = document.createElement("script");
+        // Relative URL supports both username.github.io and repository GitHub Pages URLs.
+        engine.src = new URL("./assets/swarm-engine.js", document.baseURI).href;
+        engine.async = true;
+
+        engine.onload = () => {
+          const swarm = window.__swarmRebuild;
+          if (swarm && typeof swarm.start === "function") {
+            swarm.start();
+          } else {
+            console.error("[HAPPY Script] Swarm engine loaded, but its start() API was not found.");
+            releaseCover();
+          }
+        };
+
+        engine.onerror = () => {
+          console.error("[HAPPY Script] Could not load assets/swarm-engine.js. Check the repository file path and filename.");
+          releaseCover();
+        };
+
+        document.head.appendChild(engine);
+      }
+
+      if (document.readyState === "complete") {
+        loadSwarm();
+      } else {
+        window.addEventListener("load", loadSwarm, { once: true });
+      }
+    })();
   </script>
 </body>
 </html>
