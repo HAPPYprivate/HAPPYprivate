@@ -45,10 +45,23 @@
   const BLUE = "#0D99FF";
   const RED = "#F24822";
   const RULER = 20;
-  const MIN_AGENTS = 8;
-  const MAX_AGENTS = 48;
-  const FLOCK_AGENTS = 36;
-  const INTRO_AGENTS = 18;
+  // Agent limits are supplied by index.html and validated here before use.
+  const SWARM_CONFIG = window.__swarmConfig && typeof window.__swarmConfig === "object"
+    ? window.__swarmConfig
+    : {};
+  const configInt = (key, fallback, min, max) => {
+    const value = Number(SWARM_CONFIG[key]);
+    return Number.isFinite(value)
+      ? Math.max(min, Math.min(max, Math.round(value)))
+      : fallback;
+  };
+  const MIN_AGENTS = configInt("minAgents", 4, 1, 12);
+  const MAX_AGENTS = Math.max(MIN_AGENTS, configInt("maxAgents", 20, MIN_AGENTS, 48));
+  const FLOCK_AGENTS = configInt("flockAgents", 12, MIN_AGENTS, MAX_AGENTS);
+  const INTRO_AGENTS = configInt("introAgents", 10, MIN_AGENTS, MAX_AGENTS);
+  const IDLE_RETIRE_SECONDS = configInt("idleRetireMs", 1800, 600, 8000) / 1000;
+  const SCROLL_BOOST_STEP = configInt("scrollBoostStep", 160, 80, 1000);
+  const SCROLL_BOOST_MAX = configInt("scrollBoostMax", 4, 0, 8);
   const MAX_ITEMS = 4000;
   const MAX_WORLD_H = 40000;
   const SVGNS = "http://www.w3.org/2000/svg";
@@ -2159,7 +2172,7 @@
       for (let n = 0; n < INTRO_AGENTS; n++) {
         const side = n % 2 === 0;
         const p = this.fromViewport(side ? vp.ox - 40 - rand(0, 200) : vp.ox + vp.vw + 40 + rand(0, 200), vp.oy + rand(0.05, 0.95) * vp.vh);
-        const c = this.makeCursor(p.x, p.y, n < MIN_AGENTS);
+        const c = this.makeCursor(p.x, p.y);
         c.follow = true;
         this.cursors.push(c);
       }
@@ -2175,11 +2188,11 @@
       this.ready = true;
     }
 
-    makeCursor(x, y, home = false) {
+    makeCursor(x, y) {
       const id = this.nextId++;
       const fast = Math.random() < 0.25;
       return {
-        id, x, y, home,
+        id, x, y,
         name: roster(id).name,
         color: roster(id).color,
         shape: "arrow", press: 0, task: null, gen: null, ov: null,
@@ -2386,14 +2399,24 @@
         );
 
       this.spawnCooldown -= dt;
-      const want = clamp(MIN_AGENTS + Math.floor(this.vel / 40) + Math.floor(avail.length / 2), MIN_AGENTS, MAX_AGENTS);
+      const busy = this.cursors.filter((c) => c.task && !c.leaving).length;
+      const demand = busy + avail.length;
+      const workloadAgents = avail.length > 0
+        ? Math.max(0, Math.ceil(Math.sqrt(avail.length)) - 1)
+        : 0;
+      const scrollBoost = avail.length > 0
+        ? Math.min(SCROLL_BOOST_MAX, Math.floor(this.vel / SCROLL_BOOST_STEP))
+        : 0;
+      // Scale the crew to real work demand. With no available/active work, target zero.
+      const want = demand > 0
+        ? clamp(Math.min(MIN_AGENTS, demand) + workloadAgents + scrollBoost, 1, MAX_AGENTS)
+        : 0;
       const active = this.cursors.filter((c) => !c.leaving).length;
-      const busy = this.cursors.filter((c) => c.task).length;
-      if (active < want && avail.length > active - busy && this.spawnCooldown <= 0) {
+      if (active < want && avail.length > Math.max(0, active - busy) && this.spawnCooldown <= 0) {
         const left = Math.random() < 0.5;
         const p = this.fromViewport(left ? vp.ox - 40 : vp.ox + vp.vw + 40, vp.oy + rand(0.2, 0.8) * vp.vh);
         this.cursors.push(this.makeCursor(p.x, p.y));
-        this.spawnCooldown = 0.035;
+        this.spawnCooldown = 0.075;
       }
 
       for (const c of this.cursors) {
@@ -2420,9 +2443,14 @@
         if (c.angle !== 0) c.angle = Math.abs(c.angle) < 0.5 ? 0 : c.angle * (1 - Math.min(1, dt * 10));
         if (!c.task) {
           c.idleFor += dt;
-          if (!c.leaving && c.idleFor > 2.5 && this.cursors.filter((m) => !m.leaving).length > MIN_AGENTS && !c.home) {
-            c.leaving = true;
-            c.gen = this.leave(c);
+          if (!c.leaving && c.idleFor > IDLE_RETIRE_SECONDS) {
+            const activeNow = this.cursors.filter((m) => !m.leaving).length;
+            const busyNow = this.cursors.filter((m) => m.task && !m.leaving).length;
+            // Retire only surplus idle agents; never interrupt an agent holding a task.
+            if (activeNow > Math.max(busyNow, want)) {
+              c.leaving = true;
+              c.gen = this.leave(c);
+            }
           }
           if (!c.gen) c.gen = this.idle(c);
         }
@@ -3729,7 +3757,8 @@
           this.renderSoundBtn();
         }
       } catch (err) {
-        console.error("[swarm-rebuild]", err);
+        failApp(this, err);
+        return;
       }
       this.raf = requestAnimationFrame((t) => this.frame(t));
     }
@@ -3743,7 +3772,7 @@
         this.tourV = 0;
         return;
       }
-      const crew = Math.max(MIN_AGENTS, E.cursors.filter((c) => !c.leaving).length);
+      const crew = Math.max(1, E.cursors.filter((c) => !c.leaving).length);
       const backlog = E.backlog();
       const target = backlog <= Math.max(4, crew * 0.6) ? 230 : backlog <= crew * 1.5 ? 80 : 0;
       this.tourV += (target - this.tourV) * Math.min(1, dt * 2.5);
@@ -3859,12 +3888,41 @@
   let app = null;
   let lastShot = null;
 
+  function failApp(instance, err) {
+    if (instance && app !== instance) return;
+    if (instance && instance._failed) return;
+    console.error("[swarm-rebuild] Startup/runtime failure; restoring the original page.", err);
+
+    if (instance) {
+      instance._failed = true;
+      instance.dead = true;
+      clearTimeout(instance.liveT);
+      if (instance.raf != null) cancelAnimationFrame(instance.raf);
+      for (const unbind of instance.unbinds || []) {
+        try { unbind(); } catch (_) {}
+      }
+      try { instance.view?.host?.remove(); } catch (_) {}
+      try { instance.sfx?.close(0.1); } catch (_) {}
+    }
+
+    if (!instance || app === instance) app = null;
+    document.documentElement.removeAttribute("data-swarm-init");
+    document.documentElement.removeAttribute("data-swarm-building");
+    emit("portfolio:swarm-end");
+    void unhidePage();
+  }
+
   function start() {
     if (app) return;
     document.documentElement.setAttribute("data-swarm-building", "true");
     emit("portfolio:swarm-start");
-    app = new App();
-    app.run().catch((err) => console.error("[swarm-rebuild]", err));
+    try {
+      const instance = new App();
+      app = instance;
+      instance.run().catch((err) => failApp(instance, err));
+    } catch (err) {
+      failApp(app, err);
+    }
   }
 
   function stop(reveal) {
