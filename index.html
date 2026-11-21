@@ -7,48 +7,15 @@
   <meta name="theme-color" content="#020005" />
   <meta name="description" content="The official HAPPY Script page. Find project updates, join the community, and access the script." />
 
-  <!-- Swarm first-paint cover + stable layout lock. -->
+  <!-- Swarm first-paint cover: keeps the page hidden until the cursor build canvas is ready. -->
   <style id="swarm-first-paint-style">
     :root { --swarm-cover-bg: #020005; }
-
     html[data-swarm-init="true"]::before {
       content: "";
       position: fixed;
       inset: 0;
       z-index: 2147483640;
       background: var(--swarm-cover-bg, #020005);
-    }
-
-    /* Keep the real page's layout fixed while Swarm draws its snapshot. */
-    html[data-swarm-freeze="true"] {
-      scroll-behavior: auto !important;
-    }
-
-    html[data-swarm-freeze="true"] body,
-    html[data-swarm-freeze="true"] body *,
-    html[data-swarm-freeze="true"] body *::before,
-    html[data-swarm-freeze="true"] body *::after {
-      animation-play-state: paused !important;
-      transition: none !important;
-      scroll-behavior: auto !important;
-    }
-
-    /* These two entrance effects must be in their final layout state before capture. */
-    html[data-swarm-freeze="true"] .brand-area,
-    html[data-swarm-revealed="true"] .brand-area {
-      animation: none !important;
-      opacity: 1 !important;
-      transform: none !important;
-    }
-
-    html[data-swarm-freeze="true"] .brand-logo {
-      animation: none !important;
-      transform: none !important;
-    }
-
-    html[data-swarm-freeze="true"] .glass-panel {
-      opacity: 1 !important;
-      transform: none !important;
     }
   </style>
   <script id="swarm-first-paint-init">
@@ -59,10 +26,11 @@
         const alreadyBuilt = Array.isArray(builtPaths) && builtPaths.includes(window.location.pathname);
 
         if (!reducedMotion && !alreadyBuilt) {
-          const root = document.documentElement;
-          root.setAttribute("data-swarm-init", "true");
-          root.setAttribute("data-swarm-building", "true");
-          root.setAttribute("data-swarm-freeze", "true");
+          document.documentElement.setAttribute("data-swarm-init", "true");
+          document.documentElement.setAttribute("data-swarm-building", "true");
+          // Stays for the whole page life: the page is born in its final state, so what the
+          // swarm captures is exactly what is shown when it hands over (no fade, no jump).
+          document.documentElement.setAttribute("data-swarm-run", "true");
         }
       } catch (error) {
         // If browser storage is unavailable, leave the normal page visible.
@@ -70,6 +38,7 @@
     })();
   </script>
   <title>HAPPY script</title>
+  <link rel="preload" href="assets/swarm-engine.js" as="script" />
   <link rel="icon" href="logo.png" type="image/png" />
 
   <!-- Fonts + Icons -->
@@ -274,8 +243,7 @@
       text-transform: uppercase;
     }
 
-    .badge::before {
-      content: '';
+    .badge-dot {
       width: 7px;
       height: 7px;
       flex: 0 0 7px;
@@ -415,30 +383,22 @@
       outline-offset: 4px;
     }
 
+    /* The light sweep is a background layer (not ::before) so it stays clipped to the button
+       everywhere, including while the swarm rebuilds the page. */
     .btn-discord {
       color: #fff;
-      background: linear-gradient(135deg, #5865F2, #4752C4);
+      background:
+        linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent) -200% 0 / 60% 100% no-repeat,
+        linear-gradient(135deg, #5865F2, #4752C4);
       box-shadow: 0 4px 15px rgba(88, 101, 242, 0.4);
-    }
-
-    .btn-discord::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      z-index: -1;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.22), transparent);
-      transition: left 0.5s ease;
+      transition: transform 0.3s var(--ease-bouncy), box-shadow 0.3s ease, background-position 0.7s ease, border-color 0.3s ease;
     }
 
     .btn-discord:hover {
       transform: translateY(-3px) scale(1.015);
       box-shadow: 0 8px 25px rgba(88, 101, 242, 0.58);
+      background-position: 300% 0, 0 0;
     }
-
-    .btn-discord:hover::before { left: 100%; }
 
     .btn-copy {
       color: var(--neon-cyan);
@@ -589,6 +549,30 @@
       .glass-panel { padding: 34px; gap: 30px; }
     }
 
+    /* ---- Swarm-safe state -------------------------------------------------------------
+       The swarm snapshots the live page. If the snapshot catches an entrance animation or a
+       looping effect half-way, the rebuilt copy is faded/offset and visibly jumps when the real
+       page takes over. So during a swarm run:
+         1) entrance animations are skipped (page starts in its final state),
+         2) looping effects are frozen while building and resume seamlessly afterwards. */
+    html[data-swarm-run] .brand-area {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+
+    html[data-swarm-run] .glass-panel {
+      opacity: 1;
+      transform: none;
+      transition: box-shadow 600ms ease, border-color 600ms ease;
+    }
+
+    html[data-swarm-building] *,
+    html[data-swarm-building] *::before,
+    html[data-swarm-building] *::after {
+      animation-play-state: paused !important;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         scroll-behavior: auto !important;
@@ -613,7 +597,7 @@
 
     <main class="glass-panel" id="mainCard">
       <section class="content-area" aria-labelledby="pageTitle">
-        <div class="badge">V0.8 <span aria-hidden="true">//</span> Active</div>
+        <div class="badge"><span class="badge-dot" aria-hidden="true"></span>V0.8 <span aria-hidden="true">//</span> Active</div>
 
         <h1 id="pageTitle">
           <span class="text-glow-pink">HAPPY</span>
@@ -750,6 +734,7 @@
       let height = 0;
       let particles = [];
       let animationFrame = null;
+      const swarmBusy = () => document.documentElement.hasAttribute('data-swarm-building');
 
       function resizeCanvas() {
         const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
@@ -774,6 +759,7 @@
         }
 
         update() {
+          if (swarmBusy()) return;
           this.y += this.speedY;
           this.x += this.speedX;
 
@@ -852,11 +838,21 @@
       function releaseCover() {
         root.removeAttribute("data-swarm-init");
         root.removeAttribute("data-swarm-building");
-        root.removeAttribute("data-swarm-freeze");
-        root.removeAttribute("data-swarm-revealed");
       }
 
-      function loadSwarm() {
+      // Never leave the visitor on a blank page if the network is slow.
+      const FAILSAFE_MS = 8000;
+      const failsafe = window.setTimeout(() => {
+        if (root.getAttribute("data-swarm-init") === "true" && !window.__swarmRebuild?.app) releaseCover();
+      }, FAILSAFE_MS);
+
+      async function loadSwarm() {
+        if (root.getAttribute("data-swarm-init") !== "true") return;
+
+        // Capture only after web fonts are in: a late font swap would shift text after the build.
+        try {
+          await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 2500))]);
+        } catch (error) { /* ignore */ }
         if (root.getAttribute("data-swarm-init") !== "true") return;
 
         const engine = document.createElement("script");
@@ -865,6 +861,8 @@
         engine.async = true;
 
         engine.onload = () => {
+          window.clearTimeout(failsafe);
+          if (root.getAttribute("data-swarm-init") !== "true") return; // failsafe already released the page
           const swarm = window.__swarmRebuild;
           if (swarm && typeof swarm.start === "function") {
             swarm.start();
