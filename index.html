@@ -7,15 +7,48 @@
   <meta name="theme-color" content="#020005" />
   <meta name="description" content="The official HAPPY Script page. Find project updates, join the community, and access the script." />
 
-  <!-- Swarm first-paint cover: keeps the page hidden until the cursor build canvas is ready. -->
+  <!-- Swarm first-paint cover + stable layout lock. -->
   <style id="swarm-first-paint-style">
     :root { --swarm-cover-bg: #020005; }
+
     html[data-swarm-init="true"]::before {
       content: "";
       position: fixed;
       inset: 0;
       z-index: 2147483640;
       background: var(--swarm-cover-bg, #020005);
+    }
+
+    /* Keep the real page's layout fixed while Swarm draws its snapshot. */
+    html[data-swarm-freeze="true"] {
+      scroll-behavior: auto !important;
+    }
+
+    html[data-swarm-freeze="true"] body,
+    html[data-swarm-freeze="true"] body *,
+    html[data-swarm-freeze="true"] body *::before,
+    html[data-swarm-freeze="true"] body *::after {
+      animation-play-state: paused !important;
+      transition: none !important;
+      scroll-behavior: auto !important;
+    }
+
+    /* These two entrance effects must be in their final layout state before capture. */
+    html[data-swarm-freeze="true"] .brand-area,
+    html[data-swarm-revealed="true"] .brand-area {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    html[data-swarm-freeze="true"] .brand-logo {
+      animation: none !important;
+      transform: none !important;
+    }
+
+    html[data-swarm-freeze="true"] .glass-panel {
+      opacity: 1 !important;
+      transform: none !important;
     }
   </style>
   <script id="swarm-first-paint-init">
@@ -26,8 +59,10 @@
         const alreadyBuilt = Array.isArray(builtPaths) && builtPaths.includes(window.location.pathname);
 
         if (!reducedMotion && !alreadyBuilt) {
-          document.documentElement.setAttribute("data-swarm-init", "true");
-          document.documentElement.setAttribute("data-swarm-building", "true");
+          const root = document.documentElement;
+          root.setAttribute("data-swarm-init", "true");
+          root.setAttribute("data-swarm-building", "true");
+          root.setAttribute("data-swarm-freeze", "true");
         }
       } catch (error) {
         // If browser storage is unavailable, leave the normal page visible.
@@ -817,6 +852,8 @@
       function releaseCover() {
         root.removeAttribute("data-swarm-init");
         root.removeAttribute("data-swarm-building");
+        root.removeAttribute("data-swarm-freeze");
+        root.removeAttribute("data-swarm-revealed");
       }
 
       function loadSwarm() {
