@@ -4,7 +4,7 @@
 window.HAPPY_CONFIG = {
   discordUrl: 'https://discord.gg/Y5r4f4BYtm',
   links: {
-    sheetStudioBuy:  '',  // Buy Sheet Studio
+    sheetStudioBuy:  'https://github.com/HAPPYprivate/HAPPYprivate/releases/download/AutoUpdate/Sheet_Studio.exe',  // Buy Sheet Studio
     sheetStudioInfo: '',  // Sheet Studio details (optional)
     happyMacro:      '',  // Get Happy Macro
     generate:        '',  // Download / open Generate (free)
