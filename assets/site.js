@@ -58,6 +58,46 @@
     });
   }
 
+  // Sheet Studio information modal: content is editable in assets/site-config.js.
+  const infoModal = $('sheetStudioInfoModal');
+  const infoTrigger = document.querySelector('[data-modal-open="sheetStudioInfo"]');
+  if (infoModal && infoTrigger) {
+    const info = cfg.sheetStudioInfo || {};
+    const eyebrow = $('sheetStudioInfoEyebrow');
+    const title = $('sheetStudioInfoTitle');
+    const content = $('sheetStudioInfoContent');
+    const highlights = $('sheetStudioInfoHighlights');
+
+    if (eyebrow && info.eyebrow) eyebrow.textContent = info.eyebrow;
+    if (title && info.title) title.textContent = info.title;
+    if (content) content.textContent = info.content || 'More information about Sheet Studio will be added soon.';
+
+    if (highlights) {
+      highlights.replaceChildren();
+      const items = Array.isArray(info.highlights) ? info.highlights : [];
+      items.forEach((item) => {
+        const li = document.createElement('li');
+        li.textContent = String(item);
+        highlights.appendChild(li);
+      });
+      highlights.hidden = items.length === 0;
+    }
+
+    infoTrigger.addEventListener('click', () => {
+      if (typeof infoModal.showModal === 'function') infoModal.showModal();
+      else infoModal.setAttribute('open', '');
+    });
+    infoModal.querySelectorAll('[data-modal-close]').forEach((button) => {
+      button.addEventListener('click', () => {
+        if (typeof infoModal.close === 'function') infoModal.close();
+        else infoModal.removeAttribute('open');
+      });
+    });
+    infoModal.addEventListener('click', (event) => {
+      if (event.target === infoModal && typeof infoModal.close === 'function') infoModal.close();
+    });
+  }
+
   // Product CTAs: real link only when configured with a valid https URL; otherwise stay "Coming soon".
   document.querySelectorAll('[data-cta]').forEach((el) => {
     let url = (cfg.links || {})[el.dataset.cta];

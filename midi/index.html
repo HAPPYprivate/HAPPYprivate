@@ -58,6 +58,7 @@
   </header>
 
   <main>
+    
     <section class="sec sec-first sec-midi" id="midi" aria-labelledby="midiTitle">
       <div class="wrap">
         <div class="midi-hero reveal">
@@ -96,7 +97,7 @@
             <p class="note">A random MIDI file is not a <code>.happy</code> file. <code>.happy</code> is built for Happy Macro and is exported from Sheet Studio.</p>
             <div class="cta-row">
               <span class="btn btn-buy is-soon" data-cta="sheetStudioBuy" data-label="Buy Sheet Studio">Buy Sheet Studio</span>
-              <span class="btn btn-ghost is-soon" data-cta="sheetStudioInfo" data-label="Learn more">Learn more</span>
+              <button class="btn btn-ghost" type="button" data-modal-open="sheetStudioInfo">Learn more</button>
             </div>
           </article>
 
@@ -142,6 +143,23 @@
         </div>
       </div>
     </section>
+
+    <dialog class="info-modal" id="sheetStudioInfoModal" aria-labelledby="sheetStudioInfoTitle">
+      <div class="info-modal__panel">
+        <div class="info-modal__top">
+          <p class="info-modal__eyebrow" id="sheetStudioInfoEyebrow">HAPPY MIDI / PRODUCT DETAILS</p>
+          <button class="info-modal__close" type="button" data-modal-close aria-label="Close information window">
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+          </button>
+        </div>
+        <h2 id="sheetStudioInfoTitle">Sheet Studio</h2>
+        <p class="info-modal__copy" id="sheetStudioInfoContent"></p>
+        <ul class="info-modal__highlights" id="sheetStudioInfoHighlights"></ul>
+        <div class="info-modal__footer">
+          <button class="btn btn-primary" type="button" data-modal-close>Close</button>
+        </div>
+      </div>
+    </dialog>
 
     <section class="sec sec-faq" id="faq" aria-labelledby="faqTitle">
       <div class="wrap narrow">
