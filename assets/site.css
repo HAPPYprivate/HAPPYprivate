@@ -185,7 +185,7 @@ html[data-swarm-building] *,html[data-swarm-building] *::before,html[data-swarm-
 .info-modal__copy{color:var(--text-muted);font-size:1rem;line-height:1.8;white-space:pre-line}
 .info-modal__highlights{display:grid;gap:10px;margin:22px 0 0;padding:0;list-style:none}
 .info-modal__highlights li{position:relative;padding-left:27px;color:#e5e0f5;line-height:1.55}
-.info-modal__highlights li::before{content:"\\f00c";position:absolute;left:0;top:2px;font-family:"Font Awesome 6 Free";font-weight:900;color:var(--m-blue);font-size:.82rem}
+.info-modal__highlights li::before{content:"✓";position:absolute;left:0;top:1px;font-family:inherit;font-weight:700;color:var(--m-blue);font-size:.95rem}
 .info-modal__highlights[hidden]{display:none}
 .info-modal__footer{display:flex;justify-content:flex-end;margin-top:28px}
 .info-modal__footer .btn{cursor:pointer}
