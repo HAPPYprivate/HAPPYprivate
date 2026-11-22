@@ -9,6 +9,8 @@
   "minimum_version": "0.0.0",
   "mandatory": false,
   "release_notes": [
-    "Testing Update"
+    "Added a slideshow feature with audio support.",
+    "Added language translation for the UI.",
+    "Enabled the export of custom language files in JSON format."
   ]
 }
