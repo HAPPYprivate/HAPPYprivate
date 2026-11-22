@@ -1,16 +1,14 @@
 {
   "app_name": "Sheet Studio",
   "app_id": "sheet_studio_happy_midi",
-  "version": "0.0.2",
+  "version": "0.0.1",
   "release_date": "2026-11-22",
   "download_url": "Sheet_Studio.exe",
   "sha256": "",
   "file_size": 38692454,
-  "minimum_version": "0.0.1",
+  "minimum_version": "0.0.0",
   "mandatory": false,
   "release_notes": [
-    "Improve software performance",
-    "Fixed several issues present in the previous version",
-    "Optimizing the user interface and user experience"
+    "Testing Update"
   ]
 }
