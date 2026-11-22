@@ -3,7 +3,7 @@
   "app_id": "sheet_studio_happy_midi",
   "version": "0.0.1",
   "release_date": "2026-11-22",
-  "download_url": "Sheet_Studio.exe",
+  "download_url": "https://github.com/HAPPYprivate/HAPPYprivate/releases/download/0.0.1/Sheet_Studio.exe",
   "sha256": "",
   "file_size": 38692454,
   "minimum_version": "0.0.0",
