@@ -1,16 +1,14 @@
 {
   "app_name": "Sheet Studio",
   "app_id": "sheet_studio_happy_midi",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "release_date": "2026-11-22",
-  "download_url": "https://github.com/HAPPYprivate/HAPPYprivate/releases/download/0.0.1/Sheet_Studio.exe",
+  "download_url": "https://github.com/HAPPYprivate/HAPPYprivate/releases/download/0.0.2/Sheet_Studio.exe",
   "sha256": "",
-  "file_size": 38692454,
+  "file_size": 38651904,
   "minimum_version": "0.0.0",
   "mandatory": false,
   "release_notes": [
-    "Added a slideshow feature with audio support.",
-    "Added language translation for the UI.",
-    "Enabled the export of custom language files in JSON format."
+    "Added Icon."
   ]
 }
