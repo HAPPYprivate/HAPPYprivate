@@ -21,7 +21,7 @@ window.HAPPY_CONFIG = {
       'Work with MIDI',
       'Prepare pieces for Happy Macro',
       'Export complete .happy files',
-      '✔ Sheet Studio is currently being offered for free for a limited time.'
+      'Sheet Studio is currently being offered for free for a limited time ✨'
     ]
   }
 };
