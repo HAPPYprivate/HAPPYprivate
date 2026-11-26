@@ -1,14 +1,14 @@
 {
   "app_name": "Sheet Studio",
   "app_id": "sheet_studio_happy_midi",
-  "version": "0.0.2",
-  "release_date": "2026-11-22",
+  "version": "0.0.3",
+  "release_date": "2026-11-26",
   "download_url": "https://github.com/HAPPYprivate/HAPPYprivate/releases/download/AutoUpdate/Sheet_Studio.exe",
   "sha256": "",
-  "file_size": 38651904,
+  "file_size": 37749904,
   "minimum_version": "0.0.0",
   "mandatory": false,
   "release_notes": [
-    "Added Icon."
+    "Update vocal visualizer."
   ]
 }
